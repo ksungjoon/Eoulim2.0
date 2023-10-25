@@ -26,8 +26,9 @@ public class FriendshipService {
   public void create(Integer childId, Integer friendId) {
 
     if (childId.equals(friendId)) // childId와 friendId가 같은 경우
-    throw new EoullimApplicationException(
-          ErrorCode.INVALID_DATA, String.format("childIds are same"));
+      throw new IllegalArgumentException("id가 같은 child끼리는 친구 할 수 없음.");
+//      throw new EoullimApplicationException(
+//          ErrorCode.INVALID_DATA, String.format("childIds are same"));
 
     ChildEntity child =
         childRepository

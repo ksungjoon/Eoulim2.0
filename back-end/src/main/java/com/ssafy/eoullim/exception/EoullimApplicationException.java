@@ -7,10 +7,12 @@ import lombok.Getter;
 @AllArgsConstructor
 public class EoullimApplicationException extends RuntimeException {
 
-    private ErrorCode errorCode;
+    private final ErrorCode errorCode;
     private String message;
 
     public EoullimApplicationException(ErrorCode errorCode) {
+
+        super();
         this.errorCode = errorCode;
         this.message = null;
     }
@@ -20,7 +22,7 @@ public class EoullimApplicationException extends RuntimeException {
         if (message == null) {
             return errorCode.getMessage();
         } else {
-            return String.format("%s. %s", errorCode.getMessage(), message);
+            return String.format("%s: %s", errorCode.getMessage(), message);
         }
 
     }

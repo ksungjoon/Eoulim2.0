@@ -13,7 +13,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         response.setContentType("application/json");
-        response.setStatus(ErrorCode.INVALID_TOKEN.getStatus().value());
-        response.getWriter().write(Response.error(ErrorCode.INVALID_TOKEN.name()).toStream());
+        response.setStatus(ErrorCode.UNAUTHORIZED_TOKEN.getStatus().value());
+        response.getWriter().write(Response.error(ErrorCode.UNAUTHORIZED_TOKEN.name()).toStream());
     }
 }

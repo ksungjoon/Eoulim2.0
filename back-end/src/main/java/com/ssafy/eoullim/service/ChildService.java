@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -23,6 +24,7 @@ import java.net.URLEncoder;
 import java.util.List;
 
 import java.util.Date;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -212,6 +214,7 @@ public class ChildService {
       System.out.println(outputStringBuilder.toString());
       // ERROR : 일치하는 초등학교가 없는 경우
       if (outputStringBuilder.toString().contains("NODATA_ERROR")) {
+//        throw new NoSuchElementException();
         throw new EoullimApplicationException(
             ErrorCode.DATA_NOT_FOUND,
             String.format(
@@ -219,11 +222,9 @@ public class ChildService {
       } else { // 나온 결과물을 가지고 갈 수도 있음!! 지금은 쓸모 없으니 그냥 있나 없나만 확인
         return; // 일치하는 초등학교 있는 경우
       }
-    } catch (EoullimApplicationException e) { // ERROR : 위에서 throw한 DATA_NOT_FOUND throw
-      throw e;
-    } catch (Exception e) { // ERROR : Http Connection (api 호출 과정에서 error)
+    } catch (IOException e) { // ERROR : Http Connection (api 호출 과정에서 error)
       throw new EoullimApplicationException(
-          ErrorCode.CONNECTION_ERROR, "[ChildService - checkSchool()] Http Connection error");
+          ErrorCode.CONNECTION_ERROR, "Http Connection for Open API Request");
     }
   }
 }

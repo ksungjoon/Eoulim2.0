@@ -7,14 +7,14 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum ErrorCode {
+
   // Common Error
-  INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "Z001", "Invalid token"),
-  FORBIDDEN_NO_PERMISSION(HttpStatus.FORBIDDEN, "Z002", "Invalid Permission"),
-  INVALID_DATA(HttpStatus.BAD_REQUEST, "Z003", "Invalid data"),
+  UNAUTHORIZED_TOKEN(HttpStatus.UNAUTHORIZED, "A401", "Invalid Token"),
+  FORBIDDEN_NO_PERMISSION(HttpStatus.FORBIDDEN, "A403", "Invalid Permission"),
 
   // Server Error
   CONNECTION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "S001", "API Connection error occurs"),
-  DATABASE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "S002", "Database error occurs"),
+//  DATABASE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "S002", "Database error occurs"),
 
   // SSE Error
   NOTIFICATION_CONNECT_ERROR(
