@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:transitioned_indexed_stack/transitioned_indexed_stack.dart';
-import 'package:mobile/screen/session_screen.dart';
+import 'package:mobile/screen/join_screen.dart';
+import 'package:mobile/screen/frineds_screen.dart';
+import 'package:mobile/screen/settings_screen.dart';
 
 class Main extends StatefulWidget {
   const Main({Key? key}) : super(key: key);
@@ -27,12 +29,9 @@ class _MainState extends State<Main> {
           duration: const Duration(milliseconds: 250),
           index: currentIndex,
           children: <Widget>[
-            Container(
-              child: Session(title: "123123123"),
-            ),
-            Container(
-              color: Colors.blue,
-            ),
+            Join(),
+            Friends(),
+            Settings(),
           ],
         ),
       ),
@@ -55,6 +54,10 @@ class _MainState extends State<Main> {
         BottomNavigationBarItem(
           icon: Icon(Icons.people),
           label: 'Friends',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.settings),
+          label: 'Settings',
         ),
       ],
     );
