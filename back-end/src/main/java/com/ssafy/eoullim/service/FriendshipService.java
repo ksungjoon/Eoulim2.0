@@ -19,45 +19,72 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FriendshipService {
 
-    private final FriendshipRepository friendshipRepository;
-    private final ChildRepository childRepository;
-    private final ChildCacheRepository childCacheRepository;
+  private final FriendshipRepository friendshipRepository;
+  private final ChildRepository childRepository;
+  private final ChildCacheRepository childCacheRepository;
 
-    public void regist(Integer childId, Integer friendId) {
+  public void create(Integer childId, Integer friendId) {
 
-        if (childId.equals(friendId)) // childId와 friendId가 같은 경우
-            throw new EoullimApplicationException(ErrorCode.INVALID_DATA, String.format("childIds are same"));
+    if (childId.equals(friendId)) // childId와 friendId가 같은 경우
+    throw new EoullimApplicationException(
+          ErrorCode.INVALID_DATA, String.format("childIds are same"));
 
-        ChildEntity child = childRepository.findById(childId).orElseThrow(
-                () -> new EoullimApplicationException(ErrorCode.CHILD_NOT_FOUND));
-        ChildEntity friend = childRepository.findById(friendId).orElseThrow(
-                () -> new EoullimApplicationException(ErrorCode.CHILD_NOT_FOUND));
+    ChildEntity child =
+        childRepository
+            .findById(childId)
+            .orElseThrow(
+                () ->
+                    new EoullimApplicationException(
+                        ErrorCode.CHILD_NOT_FOUND,
+                        String.format(
+                            "[FriendshipService - create()] %d라는 ID를 가진 Child 없음.", childId)));
+    ChildEntity friend =
+        childRepository
+            .findById(friendId)
+            .orElseThrow(
+                () ->
+                    new EoullimApplicationException(
+                        ErrorCode.CHILD_NOT_FOUND,
+                        String.format(
+                            "[FriendshipService - create()] %d라는 ID를 가진 Child 없음.", friendId)));
 
-        friendshipRepository.findByChildAndFriend(child, friend) // 이미 좋아요 누른 친구인 경우
-            .ifPresent(it -> { throw new EoullimApplicationException(ErrorCode.INVALID_DATA); });
+    friendshipRepository
+        .findByChildAndFriend(child, friend) // 이미 좋아요 누른 친구인 경우
+        .ifPresent(
+            it -> {
+              throw new EoullimApplicationException(
+                  ErrorCode.DUPLICATED_FRIEND, "[FriendshipService - create()] 둘은 이미 친구에요");
+            });
 
-        friendshipRepository.save(FriendshipEntity.of(child, friend));
+    friendshipRepository.save(FriendshipEntity.of(child, friend));
+  }
+
+  public List<Child> getFriends(Integer childId, Integer userId) {
+
+    ChildEntity childEntity =
+        childRepository
+            .findById(childId)
+            .orElseThrow(
+                () ->
+                    new EoullimApplicationException(
+                        ErrorCode.CHILD_NOT_FOUND,
+                        String.format(
+                            "[FriendshipService - getFriends()] %d라는 ID를 가진 Child 없음.", childId)));
+
+    if (!childEntity.getUser().getId().equals(userId)) // user가 해당 child에 권한이 없는 경우
+      throw new EoullimApplicationException(
+            ErrorCode.FORBIDDEN_NO_PERMISSION,
+            String.format(
+                "[FriendshipService - getFriends()] you have no permission with child %d", childId));
+
+    List<Child> friends =
+        friendshipRepository.findFriendsByChild(childEntity).stream()
+            .map(Child::fromEntity)
+            .collect(Collectors.toList());
+    for (Child friend : friends) {
+      if (childCacheRepository.isON(friend.getId())) friend.setStatus(Status.ON);
+      else friend.setStatus(Status.OFF);
     }
-
-    public List<Child> getFriends(Integer childId, Integer userId) {
-
-        ChildEntity childEntity = childRepository.findById(childId).orElseThrow(
-                () -> new EoullimApplicationException(ErrorCode.CHILD_NOT_FOUND,
-                        String.format("child %d is not found", childId)));
-
-        if(!childEntity.getUser().getId().equals(userId)) // user가 해당 child에 권한이 없는 경우
-            throw new EoullimApplicationException(ErrorCode.FORBIDDEN_NO_PERMISSION,
-                    String.format("you have no permission with child %d", childId));
-
-        List<Child> friends = friendshipRepository.findFriendsByChild(childEntity)
-                                .stream()
-                                .map(Child::fromEntity)
-                                .collect(Collectors.toList());
-        for (Child friend : friends) {
-            if (childCacheRepository.isON(friend.getId()))
-                friend.setStatus(Status.ON);
-            else friend.setStatus(Status.OFF);
-        }
-        return friends;
-    }
+    return friends;
+  }
 }

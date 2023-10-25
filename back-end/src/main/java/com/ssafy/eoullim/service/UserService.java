@@ -21,71 +21,94 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final UserRepository userRepository;
-    private final BCryptPasswordEncoder encoder;
-    private final UserCacheRepository userCacheRepository;
-    private final RedisTemplate<String, Object> blackListTemplate;
+  private final UserRepository userRepository;
+  private final BCryptPasswordEncoder encoder;
+  private final UserCacheRepository userCacheRepository;
+  private final RedisTemplate<String, Object> blackListTemplate;
 
-    @Value("${jwt.secret-key}")
-    private String secretKey;
+  @Value("${jwt.secret-key}")
+  private String secretKey;
 
-    @Value("${jwt.token.expired-time-ms}")
-    private Long expiredTimeMs;
+  @Value("${jwt.token.expired-time-ms}")
+  private Long expiredTimeMs;
 
-    public User loadUserByUsername(String userName) throws UsernameNotFoundException {
-        return userCacheRepository.getUser(userName).orElseGet(
-                () -> userRepository.findByUserName(userName).map(User::fromEntity).orElseThrow(
-                        () -> new EoullimApplicationException(ErrorCode.USER_NOT_FOUND)));
+  public User loadUserByUsername(String userName) throws UsernameNotFoundException {
+    return userCacheRepository
+        .getUser(userName)
+        .orElseGet(
+            () ->
+                userRepository
+                    .findByUserName(userName)
+                    .map(User::fromEntity)
+                    .orElseThrow(
+                        () ->
+                            new EoullimApplicationException(
+                                ErrorCode.USER_NOT_FOUND,
+                                String.format(
+                                    "[UserService - loadUserByUsername()] %s라는 ID를 가진 user 없음.",
+                                    userName))));
+  }
+
+  public void join(String userName, String password, String name, String phoneNumber) {
+    userRepository
+        .findByUserName(userName)
+        .ifPresent(
+            it -> {
+              throw new EoullimApplicationException(
+                  ErrorCode.DUPLICATED_NAME,
+                  String.format("[UserService - join()] %s라는 이름은 이미 등록됨. 사용할 수 없어!", userName));
+            });
+    userRepository.save(UserEntity.of(name, phoneNumber, userName, encoder.encode(password)));
+  }
+
+  public String login(String userName, String password) {
+    User savedUser = loadUserByUsername(userName);
+
+    String key = setBlackListKey(userName); // BlackList Key
+    blackListTemplate.delete(key); // BlackList에서 삭제
+    userCacheRepository.setUser(savedUser); // UserCache에 저장
+    if (!encoder.matches(password, savedUser.getPassword())) {
+      throw new EoullimApplicationException(
+          ErrorCode.FORBIDDEN_INVALID_PASSWORD, "[UserService - login()] 비밀번호를 틀림.");
     }
+    return JwtTokenUtils.generateAccessToken(userName, secretKey, expiredTimeMs);
+  }
 
-    public void join(String userName, String password, String name, String phoneNumber) {
-        userRepository.findByUserName(userName).ifPresent(it -> {
-            throw new EoullimApplicationException(ErrorCode.DUPLICATED_NAME);
-        });
-        userRepository.save(UserEntity.of(name, phoneNumber, userName, encoder.encode(password)));
+  public void logout(String userName) {
+    String key = setBlackListKey(userName);
+    userCacheRepository.delete(userName); // UserCache에서 삭제
+    blackListTemplate.opsForValue().set(key, "logout", expiredTimeMs, TimeUnit.MILLISECONDS);
+  }
+
+  public String setBlackListKey(String userName) {
+    return "BlackList:" + userName;
+  }
+
+  @Transactional
+  public void modify(User user, String curPassword, String newPassword) {
+    if (!encoder.matches(curPassword, user.getPassword())) {
+      throw new EoullimApplicationException(
+          ErrorCode.FORBIDDEN_INVALID_PASSWORD, "[UserService - login()] 비밀번호를 틀림.");
     }
+    user.setPassword(encoder.encode(newPassword));
+    userRepository.save(UserEntity.of(user));
+  }
 
-    public String login(String userName, String password) {
-        User savedUser = loadUserByUsername(userName);
+  public void checkId(String userName) {
+    userRepository
+        .findByUserName(userName)
+        .ifPresent(
+            it -> {
+              throw new EoullimApplicationException(
+                  ErrorCode.DUPLICATED_NAME,
+                  String.format("[UserService - join()] %s라는 이름은 이미 등록됨. 사용할 수 없어!", userName));
+            });
+  }
 
-        String key = setBlackListKey(userName); // BlackList Key
-        blackListTemplate.delete(key); // BlackList에서 삭제
-        userCacheRepository.setUser(savedUser); // UserCache에 저장
-        if (!encoder.matches(password, savedUser.getPassword())) {
-            throw new EoullimApplicationException(ErrorCode.FORBIDDEN_INVALID_PASSWORD);
-        }
-        return JwtTokenUtils.generateAccessToken(userName, secretKey, expiredTimeMs);
+  public void checkPw(String pwRequest, String pwCorrect) {
+    if (!encoder.matches(pwRequest, pwCorrect)) {
+      throw new EoullimApplicationException(
+          ErrorCode.FORBIDDEN_INVALID_PASSWORD, "[UserService - login()] 비밀번호를 틀림.");
     }
-
-    public void logout(String userName) {
-        String key = setBlackListKey(userName);
-        userCacheRepository.delete(userName); // UserCache에서 삭제
-        blackListTemplate.opsForValue().set(key,"logout", expiredTimeMs, TimeUnit.MILLISECONDS);
-    }
-
-    public String setBlackListKey(String userName) {
-        return "BlackList:" + userName;
-    }
-
-    @Transactional
-    public void modify(User user, String curPassword, String newPassword) {
-        if (!encoder.matches(curPassword, user.getPassword())) {
-            throw new EoullimApplicationException(ErrorCode.FORBIDDEN_INVALID_PASSWORD);
-        }
-        user.setPassword(encoder.encode(newPassword));
-        userRepository.save(UserEntity.of(user));
-    }
-
-    public void checkId(String userName) {
-        userRepository.findByUserName(userName).ifPresent(it -> {
-            throw new EoullimApplicationException(ErrorCode.DUPLICATED_NAME);
-        });
-    }
-
-    public void checkPw(String pwRequest, String pwCorrect) {
-        if (!encoder.matches(pwRequest, pwCorrect)) {
-            throw new EoullimApplicationException(ErrorCode.FORBIDDEN_INVALID_PASSWORD);
-        }
-    }
-
+  }
 }

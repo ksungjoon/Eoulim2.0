@@ -7,31 +7,41 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum ErrorCode {
-    // 400 Bad Request
-    DUPLICATED_NAME(HttpStatus.BAD_REQUEST, "Duplicated user name"),
-    DUPLICATED_FRIEND(HttpStatus.BAD_REQUEST, "이미 등록된 친구입니다."),
-    INVALID_DATA(HttpStatus.BAD_REQUEST, "Invalid data"),
-    // 401 Unauthorized
-    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "Invalid token"),
-    // 403 Forbidden
-    FORBIDDEN_INVALID_PASSWORD(HttpStatus.FORBIDDEN, "Invalid password"),
-    FORBIDDEN_NO_PERMISSION(HttpStatus.FORBIDDEN, "Invalid Permission"),
-    // 404 Not Found
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User not found"),
-    CHILD_NOT_FOUND(HttpStatus.NOT_FOUND, "Child not found"),
-    DATA_NOT_FOUND(HttpStatus.NOT_FOUND, "Data not found"),
-    MATCH_NOT_FOUND(HttpStatus.NOT_FOUND, "Match not found"),
-    // 409 Conflict
-    MATCH_CONFLICT(HttpStatus.CONFLICT, "Match Conflict"),
+  // Common Error
+  INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "Z001", "Invalid token"),
+  FORBIDDEN_NO_PERMISSION(HttpStatus.FORBIDDEN, "Z002", "Invalid Permission"),
+  INVALID_DATA(HttpStatus.BAD_REQUEST, "Z003", "Invalid data"),
 
-    // 500 Internal Server Error
-    DATABASE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Database error occurs"),
-    CONNECTION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "API Connection error occurs"),
-    NOTIFICATION_CONNECT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Connect to notification occurs error"),
-    OPENVIDU_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Openvidu server error occurs"),
-    OPENVIDU_HTTP_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Openvidu http error occurs")
-    ;
+  // Server Error
+  CONNECTION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "S001", "API Connection error occurs"),
+  DATABASE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "S002", "Database error occurs"),
 
-    private final HttpStatus status;
-    private final String message;
+  // SSE Error
+  NOTIFICATION_CONNECT_ERROR(
+      HttpStatus.INTERNAL_SERVER_ERROR, "A001", "Connect to notification occurs error"),
+
+  // Child Error
+  CHILD_NOT_FOUND(HttpStatus.NOT_FOUND, "C001", "Child not found"),
+  CHILD_ANIMON_NOT_FOUND(HttpStatus.NOT_FOUND, "C002", "Child and Animon Relation not found"),
+
+  // Open API Error (School)
+  DATA_NOT_FOUND(HttpStatus.NOT_FOUND, "A001", "Data not found"),
+
+  // Friend Error
+  DUPLICATED_FRIEND(HttpStatus.BAD_REQUEST, "F001", "Duplicated friend relationship"),
+
+  // User Error
+  USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U001", "User not found"),
+  DUPLICATED_NAME(HttpStatus.BAD_REQUEST, "U002", "Duplicated user name"),
+  FORBIDDEN_INVALID_PASSWORD(HttpStatus.FORBIDDEN, "U003", "Invalid password"),
+
+  // OpenVidu Error
+  MATCH_NOT_FOUND(HttpStatus.NOT_FOUND, "O001", "Match not found"),
+  MATCH_CONFLICT(HttpStatus.CONFLICT, "O002", "Match Conflict"),
+  OPENVIDU_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "O003", "Openvidu server error occurs"),
+  OPENVIDU_HTTP_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "O004", "Openvidu http error occurs");
+
+  private final HttpStatus status;
+  private final String code; // 네이버에서 쓰는 에러 코드. 찾기 쉬움
+  private final String message;
 }

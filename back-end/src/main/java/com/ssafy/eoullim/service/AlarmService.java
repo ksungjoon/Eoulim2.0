@@ -31,7 +31,7 @@ public class AlarmService {
                         log.info("delete를 하려고 할 때 발생한 에러");
                         emitterRepository.delete(receiverId);
                         throw new EoullimApplicationException(ErrorCode.NOTIFICATION_CONNECT_ERROR,
-                                String.format("%d 에게 초대장 전송을 실패했어요.", receiverId));
+                                String.format("[AlarmService - send()] %d 에게 초대장 전송을 실패했어요.", receiverId));
                     }
                 },
                 () -> log.info("No emitter found")
@@ -51,7 +51,7 @@ public class AlarmService {
                     .data("connect completed"));
         } catch (IOException exception) {
             throw new EoullimApplicationException(ErrorCode.NOTIFICATION_CONNECT_ERROR,
-                    String.format("%d 가 초대 구독을 실패 했어요.", childId));
+                    String.format("[AlarmService - subscribe()] %d 가 초대 구독을 실패 했어요.", childId));
         }
         return emitter;
     }
