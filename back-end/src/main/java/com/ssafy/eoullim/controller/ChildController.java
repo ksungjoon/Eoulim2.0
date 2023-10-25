@@ -90,9 +90,9 @@ public class ChildController {
     }
 
     @PostMapping("/school")
-    public Response<Void> checkSchool(@RequestBody ChildSchoolRequest request) {
-        childService.checkSchool(request.getKeyword());
-        return Response.success();
+    public Response<String> checkSchool(@RequestBody ChildSchoolRequest request) {
+
+        return Response.success(childService.checkSchool(request.getKeyword()));
     }
 
 }

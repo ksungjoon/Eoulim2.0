@@ -174,7 +174,7 @@ public class ChildService {
     return Friend.fromEntity(participant);
   }
 
-  public void checkSchool(String keyword) {
+  public String checkSchool(String keyword) {
     try {
       // API URL Build
       StringBuilder urlBuilder = new StringBuilder(schoolApiUrl);
@@ -212,16 +212,20 @@ public class ChildService {
       rd.close();
       conn.disconnect();
       System.out.println(outputStringBuilder.toString());
+      return outputStringBuilder.toString();
       // ERROR : 일치하는 초등학교가 없는 경우
-      if (outputStringBuilder.toString().contains("NODATA_ERROR")) {
-//        throw new NoSuchElementException();
-        throw new EoullimApplicationException(
-            ErrorCode.DATA_NOT_FOUND,
-            String.format(
-                "[ChildService - checkSchool()] %s Elementary school has no data", keyword));
-      } else { // 나온 결과물을 가지고 갈 수도 있음!! 지금은 쓸모 없으니 그냥 있나 없나만 확인
-        return; // 일치하는 초등학교 있는 경우
-      }
+//      if (outputStringBuilder.toString().contains("NODATA_ERROR")) {
+//        throw new IllegalArgumentException(
+//            String.format(
+//                "[ChildService - checkSchool()] %s Elementary school has no data", keyword));
+////        throw new NoSuchElementException();
+////        throw new EoullimApplicationException(
+////            ErrorCode.DATA_NOT_FOUND,
+////            String.format(
+////                "[ChildService - checkSchool()] %s Elementary school has no data", keyword));
+//      } else { // 나온 결과물을 가지고 갈 수도 있음!! 지금은 쓸모 없으니 그냥 있나 없나만 확인
+//        return; // 일치하는 초등학교 있는 경우
+//      }
     } catch (IOException e) { // ERROR : Http Connection (api 호출 과정에서 error)
       throw new EoullimApplicationException(
           ErrorCode.CONNECTION_ERROR, "Http Connection for Open API Request");
