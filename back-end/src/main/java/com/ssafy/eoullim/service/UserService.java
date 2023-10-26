@@ -40,13 +40,7 @@ public class UserService {
                 userRepository
                     .findByUserName(userName)
                     .map(User::fromEntity)
-                    .orElseThrow(
-                        () ->
-                            new EoullimApplicationException(
-                                ErrorCode.USER_NOT_FOUND,
-                                String.format(
-                                    "[UserService - loadUserByUsername()] %s라는 ID를 가진 user 없음.",
-                                    userName))));
+                    .orElseThrow(() -> new EoullimApplicationException(ErrorCode.USER_NOT_FOUND)));
   }
 
   public void join(String userName, String password, String name, String phoneNumber) {
@@ -54,9 +48,7 @@ public class UserService {
         .findByUserName(userName)
         .ifPresent(
             it -> {
-              throw new EoullimApplicationException(
-                  ErrorCode.DUPLICATED_NAME,
-                  String.format("[UserService - join()] %s라는 이름은 이미 등록됨. 사용할 수 없어!", userName));
+              throw new EoullimApplicationException(ErrorCode.DUPLICATED_NAME);
             });
     userRepository.save(UserEntity.of(name, phoneNumber, userName, encoder.encode(password)));
   }
@@ -68,8 +60,7 @@ public class UserService {
     blackListTemplate.delete(key); // BlackList에서 삭제
     userCacheRepository.setUser(savedUser); // UserCache에 저장
     if (!encoder.matches(password, savedUser.getPassword())) {
-      throw new EoullimApplicationException(
-          ErrorCode.FORBIDDEN_INVALID_PASSWORD, "[UserService - login()] 비밀번호를 틀림.");
+      throw new EoullimApplicationException(ErrorCode.INVALID_PASSWORD);
     }
     return JwtTokenUtils.generateAccessToken(userName, secretKey, expiredTimeMs);
   }
@@ -87,8 +78,7 @@ public class UserService {
   @Transactional
   public void modify(User user, String curPassword, String newPassword) {
     if (!encoder.matches(curPassword, user.getPassword())) {
-      throw new EoullimApplicationException(
-          ErrorCode.FORBIDDEN_INVALID_PASSWORD, "[UserService - login()] 비밀번호를 틀림.");
+      throw new EoullimApplicationException(ErrorCode.INVALID_PASSWORD);
     }
     user.setPassword(encoder.encode(newPassword));
     userRepository.save(UserEntity.of(user));
@@ -99,16 +89,13 @@ public class UserService {
         .findByUserName(userName)
         .ifPresent(
             it -> {
-              throw new EoullimApplicationException(
-                  ErrorCode.DUPLICATED_NAME,
-                  String.format("[UserService - join()] %s라는 이름은 이미 등록됨. 사용할 수 없어!", userName));
+              throw new EoullimApplicationException(ErrorCode.DUPLICATED_NAME);
             });
   }
 
   public void checkPw(String pwRequest, String pwCorrect) {
     if (!encoder.matches(pwRequest, pwCorrect)) {
-      throw new EoullimApplicationException(
-          ErrorCode.FORBIDDEN_INVALID_PASSWORD, "[UserService - login()] 비밀번호를 틀림.");
+      throw new EoullimApplicationException(ErrorCode.INVALID_PASSWORD);
     }
   }
 }

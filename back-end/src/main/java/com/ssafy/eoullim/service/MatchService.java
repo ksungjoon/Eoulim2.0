@@ -61,8 +61,7 @@ public class MatchService {
     String sessionId = childId.toString() + "_" + formatNow; // sessionId 결정
 
     if (this.mapSessions.get(sessionId) != null) { // 만드려는 세션 Id가 이미 존재하는지
-      throw new EoullimApplicationException(
-          ErrorCode.MATCH_CONFLICT, "[MatchService - startRandom()] 이미 존재 하는 세션 ID");
+      throw new EoullimApplicationException(ErrorCode.MATCH_CONFLICT);
     }
     if (matchingQueue.isEmpty()) { // 비어있다면
       Room newRoom = new Room();
@@ -115,8 +114,7 @@ public class MatchService {
         existingRoom.setRecordingId(recording.getId());
         return result;
       } else {
-        throw new EoullimApplicationException(
-            ErrorCode.MATCH_NOT_FOUND, "[MatchService - startRandom()] 세션이 없다!");
+        throw new EoullimApplicationException(ErrorCode.MATCH_NOT_FOUND);
       }
     }
   }
@@ -133,8 +131,7 @@ public class MatchService {
         mapSessions.remove(sessionId);
         mapRooms.remove(sessionId);
 
-        throw new EoullimApplicationException(
-            ErrorCode.MATCH_NOT_FOUND, "[MatchService - stopRandom()] 세션이 없다!");
+        throw new EoullimApplicationException(ErrorCode.MATCH_NOT_FOUND);
 
       } else { // 매치가 된 후 나갔을 경우
         String recordId = sessionRecordings.get(sessionId);
@@ -154,8 +151,7 @@ public class MatchService {
         return recording;
       }
     } else {
-      throw new EoullimApplicationException(
-          ErrorCode.MATCH_NOT_FOUND, "[MatchService - stopRandom()] 세션이 없다!");
+      throw new EoullimApplicationException(ErrorCode.MATCH_NOT_FOUND);
     }
   }
 
@@ -175,8 +171,7 @@ public class MatchService {
       String sessionId = childId.toString() + "_" + formatNow; // sessionId 결정
 
       if (this.mapSessions.get(sessionId) != null) { // 만드려는 세션 Id가 이미 존재하는지
-        throw new EoullimApplicationException(
-            ErrorCode.MATCH_CONFLICT, "[MatchService - startFriend()] 이미 존재 하는 세션 ID");
+        throw new EoullimApplicationException(ErrorCode.MATCH_CONFLICT);
       } else { // 없는거 확인했으면 세로운 세션 Id 만들기
         log.info("[EMPTY] Session created: " + sessionId);
 
@@ -231,12 +226,10 @@ public class MatchService {
 
           return result;
         } else {
-          throw new EoullimApplicationException(
-              ErrorCode.MATCH_NOT_FOUND, "[MatchService - startFriend()] 세션이 없다!");
+          throw new EoullimApplicationException(ErrorCode.MATCH_NOT_FOUND);
         }
       } else {
-        throw new EoullimApplicationException(
-            ErrorCode.MATCH_NOT_FOUND, "[MatchService - startFriend()] 세션이 없다!");
+        throw new EoullimApplicationException(ErrorCode.MATCH_NOT_FOUND);
       }
     }
   }
@@ -251,8 +244,7 @@ public class MatchService {
         mapSessions.remove(sessionId);
         mapRooms.remove(sessionId);
 
-        throw new EoullimApplicationException(
-            ErrorCode.MATCH_NOT_FOUND, "[MatchService - stopFriend()] 세션이 없다!");
+        throw new EoullimApplicationException(ErrorCode.MATCH_NOT_FOUND);
 
       } else { // 매치가 된 후 나갔을 경우
         String recordId = sessionRecordings.get(sessionId);
@@ -268,8 +260,7 @@ public class MatchService {
         return recording;
       }
     } else {
-      throw new EoullimApplicationException(
-          ErrorCode.MATCH_CONFLICT, "[MatchService - stopFriend()] 이미 존재 하는 세션 ID");
+      throw new EoullimApplicationException(ErrorCode.MATCH_CONFLICT);
     }
   }
 }
