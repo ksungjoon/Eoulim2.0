@@ -30,7 +30,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public Response<String> login(@RequestBody UserLoginRequest request) {
+    public Response<String> login(@Valid @RequestBody UserLoginRequest request) {
         String token = userService.login(request.getUserName(), request.getPassword());
         return Response.success(token);
     }
@@ -42,20 +42,20 @@ public class UserController {
     }
 
     @PutMapping
-    public Response<Void> modify(@RequestBody UserModifyRequest request, Authentication authentication) {
+    public Response<Void> modify(@Valid @RequestBody UserModifyRequest request, Authentication authentication) {
         User user = ClassUtils.getSafeCastInstance(authentication.getPrincipal(), User.class);
         userService.modify(user, request.getCurPassword(), request.getNewPassword());
         return Response.success();
     }
     
     @PostMapping("/id-check")    // ID 중복 체크
-    public Response<Void> checkId(@RequestBody UserIdCheckRequest request) {
+    public Response<Void> checkId(@Valid @RequestBody UserIdCheckRequest request) {
         userService.checkId(request.getUserName());
         return Response.success();
     }
     
     @PostMapping("/pw-check")    // User Password 재확인
-    public Response<Void> checkPw(@RequestBody UserPwCheckRequest request, Authentication authentication) {
+    public Response<Void> checkPw(@Valid @RequestBody UserPwCheckRequest request, Authentication authentication) {
         User user = ClassUtils.getSafeCastInstance(authentication.getPrincipal(), User.class);
         userService.checkPw(request.getPassword(), user.getPassword());
         return Response.success();
