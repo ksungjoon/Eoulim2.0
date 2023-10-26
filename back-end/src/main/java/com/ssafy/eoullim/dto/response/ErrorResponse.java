@@ -3,11 +3,9 @@ package com.ssafy.eoullim.dto.response;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import org.springframework.http.HttpStatus;
 
 @Getter
-@ToString
 @NoArgsConstructor
 public class ErrorResponse {    // 반환할 Error Response 객체
     private HttpStatus status;
@@ -19,5 +17,14 @@ public class ErrorResponse {    // 반환할 Error Response 객체
         this.status = status;
         this.code = code;
         this.message = message;
+    }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"status\":" + "\"" + status + "\"," +
+                "\"code\":" + "\"" + code + "\"," +
+                "\"message\":" + "\"" + message + "\"," +
+                "}";
     }
 }
