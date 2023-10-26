@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/users")
@@ -19,7 +21,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/join")
-    private Response<Void> join(@RequestBody UserJoinRequest request) {
+    private Response<Void> join(@Valid @RequestBody UserJoinRequest request) {
         userService.join(request.getUserName(),
                 request.getPassword(),
                 request.getName(),
