@@ -10,11 +10,12 @@ import com.ssafy.eoullim.model.entity.ChildEntity;
 import com.ssafy.eoullim.model.entity.UserEntity;
 import com.ssafy.eoullim.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.NoResultException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -23,13 +24,11 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.List;
 
-import java.util.Date;
-import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ChildService {
 
   private final ChildRepository childRepository;
@@ -42,11 +41,7 @@ public class ChildService {
 
   private String schoolApiUrl = "http://api.data.go.kr/openapi/tn_pubr_public_elesch_mskul_lc_api";
 
-  public List<Child> getChildrenList(Integer userId) {
-    return childRepository.findAllByUserId(userId).stream()
-        .map(Child::fromEntity)
-        .collect(Collectors.toList());
-  }
+
 
   @Transactional
   public void create(User user, ChildRequest request) {
@@ -63,40 +58,19 @@ public class ChildService {
 
   @Transactional
   public Child login(Integer childId) {
-    ChildEntity childEntity =
-        childRepository
-            .findById(childId)
-            .orElseThrow(
-                () ->
-                    new EoullimApplicationException(
-                        ErrorCode.CHILD_NOT_FOUND,
-                        String.format("[ChildService - login()] %d라는 ID를 가진 Child 없음.", childId)));
+    final var childEntity = getChildEntity(childId);
     childCacheRepository.setStatus(childId);
     return Child.fromEntity(childEntity);
   }
 
   @Transactional
   public void logout(Integer childId) {
-    childRepository
-        .findById(childId)
-        .orElseThrow(
-            () ->
-                new EoullimApplicationException(
-                    ErrorCode.CHILD_NOT_FOUND,
-                    String.format("[ChildService - logout()] %d라는 ID를 가진 Child 없음.", childId)));
+    final var childEntity = getChildEntity(childId);
     childCacheRepository.delete(childId);
   }
 
   public Child getChildInfo(Integer childId, Integer userId) {
-    ChildEntity childEntity =
-        childRepository
-            .findById(childId)
-            .orElseThrow(
-                () ->
-                    new EoullimApplicationException(
-                        ErrorCode.CHILD_NOT_FOUND,
-                        String.format(
-                            "[ChildService - getChildInfo()] %d라는 ID를 가진 Child 없음.", childId)));
+    final var childEntity = getChildEntity(childId);
 
     if (!childEntity.getUser().getId().equals(userId))
       throw new EoullimApplicationException(ErrorCode.FORBIDDEN_NO_PERMISSION);
@@ -105,14 +79,7 @@ public class ChildService {
 
   @Transactional
   public void modify(Integer childId, ChildRequest request) {
-    ChildEntity childEntity =
-        childRepository
-            .findById(childId)
-            .orElseThrow(
-                () ->
-                    new EoullimApplicationException(
-                        ErrorCode.CHILD_NOT_FOUND,
-                        String.format("[ChildService - modify()] %d라는 ID를 가진 Child 없음.", childId)));
+    final var childEntity = getChildEntity(childId);
     childEntity.setName(request.getName());
     childEntity.setBirth(request.getBirth());
     childEntity.setGender(request.getGender());
@@ -122,19 +89,10 @@ public class ChildService {
 
   @Transactional
   public void delete(Integer childId, Integer userId) {
-    ChildEntity childEntity =
-        childRepository
-            .findById(childId)
-            .orElseThrow(
-                () ->
-                    new EoullimApplicationException(
-                        ErrorCode.CHILD_NOT_FOUND,
-                        String.format("[ChildService - delete()] %d라는 ID를 가진 Child 없음.", childId)));
+    final var childEntity = getChildEntity(childId);
 
     if (!childEntity.getUser().getId().equals(userId))
-      throw new EoullimApplicationException(
-          ErrorCode.FORBIDDEN_NO_PERMISSION,
-          String.format("[ChildService - delete()] %d User는 %d Child에 접근이 금지됨.", userId, childId));
+      throw new EoullimApplicationException(ErrorCode.FORBIDDEN_NO_PERMISSION);
     childRepository.delete(childEntity);
   }
 
@@ -149,49 +107,68 @@ public class ChildService {
     ChildAnimonEntity childAnimonEntity =
         childAnimonRepository
             .findByChildIdAndAnimonId(childId, animonId)
-            .orElseThrow(
-                () ->
-                    new EoullimApplicationException(
-                        ErrorCode.CHILD_ANIMON_NOT_FOUND,
-                        "[ChildService - setAnimon()] %d child and %d animon relation not found"));
+            .orElseThrow(() -> new EoullimApplicationException(ErrorCode.CHILD_ANIMON_NOT_FOUND));
+    //    new IllegalArgumentException("Child가 소유하지 않은 애니몬은 사용할 수 없습니다."));
     AnimonEntity animonEntity = childAnimonEntity.getAnimon();
     ChildEntity childEntity = childAnimonEntity.getChild();
     childEntity.setAnimon(animonEntity);
     return Animon.fromEntity(animonEntity);
   }
 
+  public ChildEntity getChildEntity(Integer childId) {
+    return childRepository
+        .findById(childId)
+        .orElseThrow(() -> new EoullimApplicationException(ErrorCode.CHILD_NOT_FOUND));
+  }
+
+  public List<Child> getChildrenList(Integer userId) {
+    return childRepository.findAllByUserId(userId).stream()
+            .map(Child::fromEntity)
+            .collect(Collectors.toList());
+  }
+
   public Friend getParticipantInfo(Integer participantId) {
     ChildEntity participant =
         childRepository
             .findById(participantId)
-            .orElseThrow(
-                () ->
-                    new EoullimApplicationException(
-                        ErrorCode.CHILD_NOT_FOUND,
-                        String.format(
-                            "[ChildService - getParticipantInfo()] %d라는 ID를 가진 Child 없음.",
-                            participantId)));
+            .orElseThrow(() -> new EoullimApplicationException(ErrorCode.CHILD_NOT_FOUND));
     return Friend.fromEntity(participant);
   }
 
-  public String checkSchool(String keyword) {
+  public void checkSchool(String keyword) {
     try {
       // API URL Build
       StringBuilder urlBuilder = new StringBuilder(schoolApiUrl);
-      urlBuilder.append("?" + URLEncoder.encode("ServiceKey", "UTF-8") + "=" + serviceKey);
-      urlBuilder.append(
-          "&" + URLEncoder.encode("pageNo", "UTF-8") + "=" + URLEncoder.encode("1", "UTF-8"));
-      urlBuilder.append(
-          "&" + URLEncoder.encode("numOfRows", "UTF-8") + "=" + URLEncoder.encode("100", "UTF-8"));
-      urlBuilder.append(
-          "&" + URLEncoder.encode("type", "UTF-8") + "=" + URLEncoder.encode("json", "UTF-8"));
-      urlBuilder.append(
-          "&" + URLEncoder.encode("schoolSe", "UTF-8") + "=" + URLEncoder.encode("초등학교", "UTF-8"));
-      urlBuilder.append(
-          "&"
-              + URLEncoder.encode("schoolNm", "UTF-8")
-              + "="
-              + URLEncoder.encode(keyword + "초등학교", "UTF-8"));
+      urlBuilder
+          .append("?")
+          .append(URLEncoder.encode("ServiceKey", "UTF-8"))
+          .append("=")
+          .append(serviceKey);
+      urlBuilder
+          .append("&")
+          .append(URLEncoder.encode("pageNo", "UTF-8"))
+          .append("=")
+          .append(URLEncoder.encode("1", "UTF-8"));
+      urlBuilder
+          .append("&")
+          .append(URLEncoder.encode("numOfRows", "UTF-8"))
+          .append("=")
+          .append(URLEncoder.encode("100", "UTF-8"));
+      urlBuilder
+          .append("&")
+          .append(URLEncoder.encode("type", "UTF-8"))
+          .append("=")
+          .append(URLEncoder.encode("json", "UTF-8"));
+      urlBuilder
+          .append("&")
+          .append(URLEncoder.encode("schoolSe", "UTF-8"))
+          .append("=")
+          .append(URLEncoder.encode("초등학교", "UTF-8"));
+      urlBuilder
+          .append("&")
+          .append(URLEncoder.encode("schoolNm", "UTF-8"))
+          .append("=")
+          .append(URLEncoder.encode(keyword + "초등학교", "UTF-8"));
       // http connection
       URL url = new URL(urlBuilder.toString());
       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -211,24 +188,14 @@ public class ChildService {
       }
       rd.close();
       conn.disconnect();
-      System.out.println(outputStringBuilder.toString());
-      return outputStringBuilder.toString();
       // ERROR : 일치하는 초등학교가 없는 경우
-//      if (outputStringBuilder.toString().contains("NODATA_ERROR")) {
-//        throw new IllegalArgumentException(
-//            String.format(
-//                "[ChildService - checkSchool()] %s Elementary school has no data", keyword));
-////        throw new NoSuchElementException();
-////        throw new EoullimApplicationException(
-////            ErrorCode.DATA_NOT_FOUND,
-////            String.format(
-////                "[ChildService - checkSchool()] %s Elementary school has no data", keyword));
-//      } else { // 나온 결과물을 가지고 갈 수도 있음!! 지금은 쓸모 없으니 그냥 있나 없나만 확인
-//        return; // 일치하는 초등학교 있는 경우
-//      }
+      if (outputStringBuilder.toString().contains("NODATA_ERROR")) {
+        throw new EoullimApplicationException(ErrorCode.INVALID_SCHOOL_NAME);
+      } else { // 나온 결과물을 가지고 갈 수도 있음!! 지금은 쓸모 없으니 그냥 있나 없나만 확인
+        return; // 일치하는 초등학교 있는 경우
+      }
     } catch (IOException e) { // ERROR : Http Connection (api 호출 과정에서 error)
-      throw new EoullimApplicationException(
-          ErrorCode.CONNECTION_ERROR, "Http Connection for Open API Request");
+      throw new EoullimApplicationException(ErrorCode.OPEN_API_CONNECTION_ERROR);
     }
   }
 }
