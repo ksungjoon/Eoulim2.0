@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/screen/session/session_screen.dart';
+import 'package:mobile/screen/session_screen.dart';
 
 class Join extends StatefulWidget {
   const Join({Key? key});
