@@ -8,11 +8,9 @@ import lombok.Getter;
 public class EoullimApplicationException extends RuntimeException {
 
     private final ErrorCode errorCode;
-    private String message;
+    private String message;     // 이건 Exception이 발생했을 때, 개발자가 보기 위한 message
 
     public EoullimApplicationException(ErrorCode errorCode) {
-
-        super();
         this.errorCode = errorCode;
         this.message = null;
     }
@@ -24,6 +22,5 @@ public class EoullimApplicationException extends RuntimeException {
         } else {
             return String.format("%s: %s", errorCode.getMessage(), message);
         }
-
     }
 }
