@@ -41,21 +41,21 @@ public class ChildEntity {
     private Status status = Status.OFF;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "parent_id")
     private UserEntity user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "animon_id")
     private AnimonEntity animon;
 
-    public static ChildEntity of(UserEntity user, Child child) {
-        ChildEntity entity = new ChildEntity();
-        entity.setName(child.getName());
-        entity.setBirth(child.getBirth());
-        entity.setGender(child.getGender());
-        entity.setSchool(child.getSchool());
-        entity.setGrade(child.getGrade());
-        entity.setUser(user);
-        return entity;
-    }
+//    public static ChildEntity of(UserEntity user, Child child) {
+//        ChildEntity entity = new ChildEntity();
+//        entity.setName(child.getName());
+//        entity.setBirth(child.getBirth());
+//        entity.setGender(child.getGender());
+//        entity.setSchool(child.getSchool());
+//        entity.setGrade(child.getGrade());
+//        entity.setUser(user);
+//        return entity;
+//    }
 }
