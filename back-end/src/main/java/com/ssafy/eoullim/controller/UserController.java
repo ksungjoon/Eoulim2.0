@@ -29,7 +29,7 @@ public class UserController {
   private Response<Void> join(@Valid @RequestBody UserJoinRequest request) {
     userService.join(
         request.getUsername(), request.getPassword(), request.getName(), request.getPhoneNumber());
-    return Response.success(HttpStatus.OK, "account created");
+    return Response.success(HttpStatus.CREATED, "account created");
   }
 
   @PostMapping("/login")

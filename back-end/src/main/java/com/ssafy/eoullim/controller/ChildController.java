@@ -3,7 +3,6 @@ package com.ssafy.eoullim.controller;
 import com.ssafy.eoullim.dto.request.ChildSchoolRequest;
 import com.ssafy.eoullim.dto.request.ChildRequest;
 import com.ssafy.eoullim.dto.response.Response;
-import com.ssafy.eoullim.model.Animon;
 import com.ssafy.eoullim.model.Child;
 import com.ssafy.eoullim.model.OtherChild;
 import com.ssafy.eoullim.model.User;
@@ -96,8 +95,7 @@ public class ChildController {
 //  }
 
   @PostMapping("/school")
-  public Response<String> checkSchool(@Valid @RequestBody ChildSchoolRequest request) {
-    childService.checkSchool(request.getKeyword());
-    return Response.success();
+  public Response<Boolean> isValidSchoolName(@Valid @RequestBody ChildSchoolRequest request) {
+    return Response.success(childService.isValidSchoolName(request.getKeyword()));
   }
 }
