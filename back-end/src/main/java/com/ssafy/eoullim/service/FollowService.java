@@ -5,10 +5,10 @@ import com.ssafy.eoullim.exception.ErrorCode;
 import com.ssafy.eoullim.model.Child;
 import com.ssafy.eoullim.model.Status;
 import com.ssafy.eoullim.model.entity.ChildEntity;
-import com.ssafy.eoullim.model.entity.FriendshipEntity;
+import com.ssafy.eoullim.model.entity.FollowEntity;
 import com.ssafy.eoullim.repository.ChildCacheRepository;
 import com.ssafy.eoullim.repository.ChildRepository;
-import com.ssafy.eoullim.repository.FriendshipRepository;
+import com.ssafy.eoullim.repository.FollowRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,9 +17,9 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class FriendshipService {
+public class FollowService {
 
-  private final FriendshipRepository friendshipRepository;
+  private final FollowRepository followRepository;
   private final ChildRepository childRepository;
   private final ChildCacheRepository childCacheRepository;
 
@@ -37,14 +37,14 @@ public class FriendshipService {
             .findById(friendId)
             .orElseThrow(() -> new EoullimApplicationException(ErrorCode.CHILD_NOT_FOUND));
 
-    friendshipRepository
-        .findByChildAndFriend(child, friend) // 이미 좋아요 누른 친구인 경우
+    followRepository
+        .findByChildAndFollowing(child, friend) // 이미 좋아요 누른 친구인 경우
         .ifPresent(
             it -> {
               throw new EoullimApplicationException(ErrorCode.DUPLICATED_FRIEND);
             });
 
-    friendshipRepository.save(FriendshipEntity.of(child, friend));
+    followRepository.save(FollowEntity.of(child, friend));
   }
 
   public List<Child> getFriends(Integer childId, Integer userId) {
@@ -59,7 +59,7 @@ public class FriendshipService {
     }
 
     List<Child> friends =
-        friendshipRepository.findFriendsByChild(childEntity).stream()
+        followRepository.findFollowingsByChild(childEntity).stream()
             .map(Child::fromEntity)
             .collect(Collectors.toList());
     for (Child friend : friends) {

@@ -5,7 +5,7 @@ import com.ssafy.eoullim.dto.request.ChildRequest;
 import com.ssafy.eoullim.dto.response.Response;
 import com.ssafy.eoullim.model.Animon;
 import com.ssafy.eoullim.model.Child;
-import com.ssafy.eoullim.model.Friend;
+import com.ssafy.eoullim.model.OtherChild;
 import com.ssafy.eoullim.model.User;
 import com.ssafy.eoullim.service.ChildService;
 import com.ssafy.eoullim.utils.ClassUtils;
@@ -68,9 +68,10 @@ public class ChildController {
     return Response.success(child);
   }
 
+  // TODO  : api url refactoring
   @GetMapping("/participant/{participantId}")
-  public Response<Friend> getParticipantInfo(@PathVariable @NotBlank Integer participantId) {
-    Friend friend = childService.getParticipantInfo(participantId);
+  public Response<OtherChild> getParticipantInfo(@PathVariable @NotBlank Integer participantId) {
+    OtherChild friend = childService.getParticipantInfo(participantId);
     return Response.success(friend);
   }
 
@@ -81,18 +82,18 @@ public class ChildController {
     return Response.success(childrenList);
   }
 
-  @GetMapping("/{childId}/animons")
-  public Response<List<Animon>> getAnimonList(@PathVariable @NotBlank Integer childId) {
-    List<Animon> animonList = childService.getAnimonList(childId);
-    return Response.success(animonList);
-  }
+//  @GetMapping("/{childId}/animons")
+//  public Response<List<Animon>> getAnimonList(@PathVariable @NotBlank Integer childId) {
+//    List<Animon> animonList = childService.getAnimonList(childId);
+//    return Response.success(animonList);
+//  }
 
-  @GetMapping("/{childId}/animons/{animonId}")
-  public Response<Animon> selectAnimon(
-      @PathVariable @NotBlank Integer childId, @PathVariable Integer animonId) {
-    Animon animon = childService.setAnimon(childId, animonId);
-    return Response.success(animon);
-  }
+//  @GetMapping("/{childId}/animons/{animonId}")
+//  public Response<Animon> selectAnimon(
+//      @PathVariable @NotBlank Integer childId, @PathVariable Integer animonId) {
+//    Animon animon = childService.setAnimon(childId, animonId);
+//    return Response.success(animon);
+//  }
 
   @PostMapping("/school")
   public Response<String> checkSchool(@Valid @RequestBody ChildSchoolRequest request) {

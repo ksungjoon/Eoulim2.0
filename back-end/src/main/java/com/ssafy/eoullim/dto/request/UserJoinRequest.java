@@ -11,7 +11,7 @@ import javax.validation.constraints.Pattern;
 public class UserJoinRequest {
   @NotBlank
   @Pattern(regexp = "[a-zA-Z][a-zA-Z0-9]{2,19}") // 첫 글자는 영어 대소문자, 그 뒤는 영어 대소문자 혹은 숫자 3~20자
-  String userName;
+  String username;
 
   @NotBlank
   //    @Pattern(regexp = "[a-zA-Z0-9]{8,20}")

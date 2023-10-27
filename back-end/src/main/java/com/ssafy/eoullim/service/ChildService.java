@@ -3,19 +3,21 @@ package com.ssafy.eoullim.service;
 import com.ssafy.eoullim.dto.request.ChildRequest;
 import com.ssafy.eoullim.exception.EoullimApplicationException;
 import com.ssafy.eoullim.exception.ErrorCode;
-import com.ssafy.eoullim.model.*;
+import com.ssafy.eoullim.model.Child;
+import com.ssafy.eoullim.model.OtherChild;
+import com.ssafy.eoullim.model.User;
 import com.ssafy.eoullim.model.entity.AnimonEntity;
-import com.ssafy.eoullim.model.entity.ChildAnimonEntity;
 import com.ssafy.eoullim.model.entity.ChildEntity;
 import com.ssafy.eoullim.model.entity.UserEntity;
-import com.ssafy.eoullim.repository.*;
+import com.ssafy.eoullim.repository.AnimonRepository;
+import com.ssafy.eoullim.repository.ChildCacheRepository;
+import com.ssafy.eoullim.repository.ChildRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.NoResultException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -23,7 +25,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.List;
-
 import java.util.stream.Collectors;
 
 @Service
@@ -32,7 +33,7 @@ import java.util.stream.Collectors;
 public class ChildService {
 
   private final ChildRepository childRepository;
-  private final ChildAnimonRepository childAnimonRepository;
+//  private final ChildAnimonRepository childAnimonRepository;
   private final AnimonRepository animonRepository;
   private final ChildCacheRepository childCacheRepository;
 
@@ -46,14 +47,17 @@ public class ChildService {
   @Transactional
   public void create(User user, ChildRequest request) {
     ChildEntity childEntity = ChildEntity.of(UserEntity.of(user), Child.of(request));
+    AnimonEntity animonEntity =
+        animonRepository.findById(1).orElseThrow(() -> new EoullimApplicationException(ErrorCode.DB_NOT_FOUND));
+    childEntity.setAnimon(animonEntity);
     childRepository.save(childEntity);
 
     // 기본 애니몬 4종을 해당 Child에 부여
-    List<AnimonEntity> animons = animonRepository.getDefaultAnimon();
-    for (AnimonEntity animonEntity : animons) {
-      if (animonEntity.getId() == 1) childEntity.setAnimon(animonEntity); // 4종 중 1번 애니몬을 선택
-      childAnimonRepository.save(ChildAnimonEntity.of(childEntity, animonEntity));
-    }
+//    List<AnimonEntity> animons = animonRepository.getDefaultAnimon();
+//    for (AnimonEntity animonEntity : animons) {
+//      if (animonEntity.getId() == 1) childEntity.setAnimon(animonEntity); // 4종 중 1번 애니몬을 선택
+//      childAnimonRepository.save(ChildAnimonEntity.of(childEntity, animonEntity));
+//    }
   }
 
   @Transactional
@@ -96,24 +100,26 @@ public class ChildService {
     childRepository.delete(childEntity);
   }
 
-  public List<Animon> getAnimonList(Integer childId) {
-    return childAnimonRepository.findAnimonsByChildId(childId).stream()
-        .map(Animon::fromEntity)
-        .collect(Collectors.toList());
-  }
+  // TODO:  DB에 Child가 만든 애 + Default 1234
+//  public List<Animon> getAnimonList(Integer childId) {
+//    return childAnimonRepository.findAnimonsByChildId(childId).stream()
+//        .map(Animon::fromEntity)
+//        .collect(Collectors.toList());
+//  }
 
-  @Transactional
-  public Animon setAnimon(Integer childId, Integer animonId) {
-    ChildAnimonEntity childAnimonEntity =
-        childAnimonRepository
-            .findByChildIdAndAnimonId(childId, animonId)
-            .orElseThrow(() -> new EoullimApplicationException(ErrorCode.CHILD_ANIMON_NOT_FOUND));
-    //    new IllegalArgumentException("Child가 소유하지 않은 애니몬은 사용할 수 없습니다."));
-    AnimonEntity animonEntity = childAnimonEntity.getAnimon();
-    ChildEntity childEntity = childAnimonEntity.getChild();
-    childEntity.setAnimon(animonEntity);
-    return Animon.fromEntity(animonEntity);
-  }
+  // TODO: fix
+//  @Transactional
+//  public Animon setAnimon(Integer childId, Integer animonId) {
+//    ChildAnimonEntity childAnimonEntity =
+//        childAnimonRepository
+//            .findByChildIdAndAnimonId(childId, animonId)
+//            .orElseThrow(() -> new EoullimApplicationException(ErrorCode.CHILD_ANIMON_NOT_FOUND));
+//    //    new IllegalArgumentException("Child가 소유하지 않은 애니몬은 사용할 수 없습니다."));
+//    AnimonEntity animonEntity = childAnimonEntity.getAnimon();
+//    ChildEntity childEntity = childAnimonEntity.getChild();
+//    childEntity.setAnimon(animonEntity);
+//    return Animon.fromEntity(animonEntity);
+//  }
 
   public ChildEntity getChildEntity(Integer childId) {
     return childRepository
@@ -127,12 +133,12 @@ public class ChildService {
             .collect(Collectors.toList());
   }
 
-  public Friend getParticipantInfo(Integer participantId) {
+  public OtherChild getParticipantInfo(Integer participantId) {
     ChildEntity participant =
         childRepository
             .findById(participantId)
             .orElseThrow(() -> new EoullimApplicationException(ErrorCode.CHILD_NOT_FOUND));
-    return Friend.fromEntity(participant);
+    return OtherChild.fromEntity(participant);
   }
 
   public void checkSchool(String keyword) {

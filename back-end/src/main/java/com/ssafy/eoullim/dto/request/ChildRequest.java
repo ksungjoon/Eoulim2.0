@@ -6,10 +6,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
+import java.time.LocalDate;
 import javax.validation.constraints.NotBlank;
-import java.util.Date;
 import javax.validation.constraints.Pattern;
 
 @Getter
@@ -22,7 +20,7 @@ public class ChildRequest {
     private String name;        // front 단에서 비동기 처리
 
     @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$", message = "생년월일은 'yyyy-MM-dd' 형식이어야 합니다.")
-    private Date birth;
+    private LocalDate birth;
 
     @Pattern(regexp = "^(M|W)$", message = "성별은 'M' 또는 'W' 중 하나여야 합니다.")
     private char gender;        //남자는 M, 여자는 W
