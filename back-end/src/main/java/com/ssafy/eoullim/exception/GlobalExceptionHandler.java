@@ -7,11 +7,17 @@ import io.openvidu.java.client.OpenViduJavaClientException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.ssafy.eoullim.exception.ErrorCode.*;
 
@@ -34,16 +40,28 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<ErrorResponse> requestValidationHandler(MethodArgumentNotValidException e) {
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public ErrorResponse requestValidationHandler(MethodArgumentNotValidException e) {
+    StringBuilder errorMsg = new StringBuilder();
+    errorMsg.append("Failed Validation of Request Body.").append("\n");
+
+    List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
+    for (FieldError fieldError : fieldErrors) {   // 별도로 메시지가 있는 경우만 추가
+      if (fieldError.getDefaultMessage() == null) {
+        errorMsg.append(fieldError.getCode());
+      }
+    }
+
     final var errorResponse =
             ErrorResponse.builder()
                     .status(HttpStatus.BAD_REQUEST)
                     .code(String.valueOf(HttpStatus.BAD_REQUEST.value()))
-                    .message("Failed Validation of Request Body. 잘못된 Request Body로 인한 유효성 검사 실패.")
+                    .message(errorMsg.toString())
                     .build();
     log.error("Error occurs {}", e.toString());
     log.error("Error occurs in method: " + e.getStackTrace()[0]);
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    return errorResponse;
   }
 
   @ExceptionHandler(IllegalArgumentException.class)

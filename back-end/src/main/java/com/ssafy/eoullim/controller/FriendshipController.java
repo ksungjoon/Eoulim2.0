@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 @Slf4j
@@ -27,7 +28,7 @@ public class FriendshipController {
     }
 
     @GetMapping("/{childId}")
-    public Response<List<Child>> getFriendsList(@PathVariable Integer childId, Authentication authentication) {
+    public Response<List<Child>> getFriendsList(@PathVariable @NotBlank  Integer childId, Authentication authentication) {
         User user = ClassUtils.getSafeCastInstance(authentication.getPrincipal(), User.class);
         List<Child> friendList = friendshipService.getFriends(childId, user.getId());
         return Response.success(friendList);
