@@ -29,7 +29,7 @@ public class ChildEntity {
     private LocalDate birth;
 
     @Column(nullable = false, length = 1)
-    private char gender;
+    private String gender;
 
     @Column(nullable = false, length = 20)
     private String school;

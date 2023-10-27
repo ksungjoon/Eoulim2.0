@@ -48,7 +48,7 @@ public class ChildService {
   public void create(User user, ChildRequest request) {
     ChildEntity childEntity = ChildEntity.of(UserEntity.of(user), Child.of(request));
     AnimonEntity animonEntity =
-        animonRepository.findById(1).orElseThrow(() -> new EoullimApplicationException(ErrorCode.DB_NOT_FOUND));
+        animonRepository.findById(1).orElseThrow(() -> new EoullimApplicationException(ErrorCode.DB_NOT_FOUND, "애니몬 없다. "));
     childEntity.setAnimon(animonEntity);
     childRepository.save(childEntity);
 

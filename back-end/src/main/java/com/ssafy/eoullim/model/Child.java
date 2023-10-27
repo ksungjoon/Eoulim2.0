@@ -17,7 +17,7 @@ public class Child {
     private Integer id;
     private String name;
     private LocalDate birth;
-    private char gender;
+    private String gender;
     private String school;
     private Integer grade;
     private Status status;
