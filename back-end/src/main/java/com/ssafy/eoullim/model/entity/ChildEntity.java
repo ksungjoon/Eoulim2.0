@@ -42,11 +42,11 @@ public class ChildEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
-    private UserEntity userEntity;
+    private UserEntity user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "animon_id")
-    private AnimonEntity animonEntity;
+    private AnimonEntity animon;
 
 //    public static ChildEntity of(UserEntity user, Child child) {
 //        ChildEntity entity = new ChildEntity();
