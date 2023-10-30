@@ -21,10 +21,9 @@ public class ChildRequest {
     @Length(max = 4, message = "이름은 4자 이하여야 합니다.")
     private String name;        // front 단에서 비동기 처리
 
-    // TODO: 수정 필요
-//    @ValidLocalDate
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate birth;
+    @NotBlank
+    @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$", message = "올바른 날짜 형식이 아닙니다. (예: yyyy-dd-MM)")
+    private String birth;
 
     @Pattern(regexp = "^(M|W)$", message = "성별은 'M' 또는 'W' 중 하나여야 합니다.")
     private String gender;        //남자는 M, 여자는 W

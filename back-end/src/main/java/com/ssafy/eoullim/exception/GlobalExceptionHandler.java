@@ -49,17 +49,18 @@ public class GlobalExceptionHandler {
     errorMsg.append("Failed Validation of Request Body. ").append("\n");
 
     List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
-    for (FieldError fieldError : fieldErrors) {   // 별도로 메시지가 있는 경우만 추가
+    for (FieldError fieldError : fieldErrors) { // 별도로 메시지가 있는 경우만 추가
       errorMsg.append(fieldError.getDefaultMessage()).append("\n");
-//        errorMsg.append(fieldError.getField()).append(" 은(는) ").append(fieldError.getDefaultMessage()).append("\n");
+      //        errorMsg.append(fieldError.getField()).append(" 은(는)
+      // ").append(fieldError.getDefaultMessage()).append("\n");
     }
 
     final var errorResponse =
-            ErrorResponse.builder()
-                    .status(HttpStatus.BAD_REQUEST)
-                    .code(String.valueOf(HttpStatus.BAD_REQUEST.value()))
-                    .message(errorMsg.toString())
-                    .build();
+        ErrorResponse.builder()
+            .status(HttpStatus.BAD_REQUEST)
+            .code(String.valueOf(HttpStatus.BAD_REQUEST.value()))
+            .message(errorMsg.toString())
+            .build();
     log.error("Error occurs {}", e.toString());
     log.error("Error occurs in method: " + e.getStackTrace()[0]);
     return errorResponse;
@@ -69,13 +70,14 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(HttpMessageNotReadableException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ResponseBody
-  public ErrorResponse serializerHandler(HttpMessageNotReadableException e) {   // LocalDate를 역직렬화 할 때 패턴 안맞으면
+  public ErrorResponse serializerHandler(
+      HttpMessageNotReadableException e) { // LocalDate를 역직렬화 할 때 패턴 안맞으면
     final var errorResponse =
-            ErrorResponse.builder()
-                    .status(HttpStatus.BAD_REQUEST)
-                    .code(String.valueOf(HttpStatus.BAD_REQUEST.value()))
-                    .message("Failed Validation of Request Body. 생년월일은 'yyyy-MM-dd' 형식이어야 합니다.")
-                    .build();
+        ErrorResponse.builder()
+            .status(HttpStatus.BAD_REQUEST)
+            .code(String.valueOf(HttpStatus.BAD_REQUEST.value()))
+            .message("Failed Validation of Request Body. 생년월일은 'yyyy-MM-dd' 형식이어야 합니다.")
+            .build();
     log.error("Error occurs {}", e.toString());
     log.error("Error occurs in method: " + e.getStackTrace()[0]);
     return errorResponse;

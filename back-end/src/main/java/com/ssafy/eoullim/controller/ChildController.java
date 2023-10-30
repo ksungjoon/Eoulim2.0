@@ -40,13 +40,13 @@ public class ChildController {
   @PostMapping
   public Response<Void> create(@Valid @RequestBody ChildRequest request, Authentication authentication) {
     User user = ClassUtils.getSafeCastInstance(authentication.getPrincipal(), User.class);
-    childService.create(user, request);
+    childService.create(user, Child.of(request));
     return Response.success();
   }
 
   @PutMapping("/{childId}")
   public Response<Void> modify(@PathVariable @NotBlank Integer childId, @Valid @RequestBody ChildRequest request) {
-    childService.modify(childId, request);
+    childService.modify(childId, Child.of(request));
     return Response.success();
   }
 

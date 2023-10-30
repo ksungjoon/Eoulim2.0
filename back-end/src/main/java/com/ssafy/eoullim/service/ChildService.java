@@ -45,8 +45,8 @@ public class ChildService {
 
 
   @Transactional
-  public void create(User user, ChildRequest request) {
-    ChildEntity childEntity = ChildEntity.of(UserEntity.of(user), Child.of(request));
+  public void create(User user, Child child) {
+    ChildEntity childEntity = ChildEntity.of(UserEntity.of(user), child);
     AnimonEntity animonEntity =
         animonRepository.findById(1).orElseThrow(() -> new EoullimApplicationException(ErrorCode.DB_NOT_FOUND, "애니몬 없다. "));
     childEntity.setAnimon(animonEntity);
@@ -82,13 +82,13 @@ public class ChildService {
   }
 
   @Transactional
-  public void modify(Integer childId, ChildRequest request) {
+  public void modify(Integer childId, Child child) {
     final var childEntity = getChildEntity(childId);
-    childEntity.setName(request.getName());
-    childEntity.setBirth(request.getBirth());
-    childEntity.setGender(request.getGender());
-    childEntity.setSchool(request.getSchool());
-    childEntity.setGrade(request.getGrade());
+    childEntity.setName(child.getName());
+    childEntity.setBirth(child.getBirth());
+    childEntity.setGender(child.getGender());
+    childEntity.setSchool(child.getSchool());
+    childEntity.setGrade(child.getGrade());
   }
 
   @Transactional
