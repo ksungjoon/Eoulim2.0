@@ -22,10 +22,10 @@ public class ErrorResponse extends CommonResponse {    // 반환할 Error Respon
     @Override
     public String toString() {
         return "{" +
+                "\"timestamp\":" + "\"" + this.getTimeStamp() + "\"," +
                 "\"status\":" + "\"" + this.getStatus() + "\"," +
                 "\"code\":" + "\"" + this.getCode() + "\"," +
                 "\"message\":" + "\"" + this.getMessage() + "\"," +
-                "\"timestamp\":" + "\"" + this.getTimeStamp() + "\"," +
                 "}";
     }
 }

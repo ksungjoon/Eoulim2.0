@@ -15,5 +15,4 @@ public class CommonResponse {
     private ZonedDateTime timeStamp;
     private String status;
     private String code;
-
 }
