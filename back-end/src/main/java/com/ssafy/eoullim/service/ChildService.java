@@ -27,9 +27,9 @@ import java.net.URLEncoder;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
+@Service
 public class ChildService {
 
   private final ChildRepository childRepository;
@@ -47,9 +47,13 @@ public class ChildService {
   @Transactional
   public void create(User user, Child child) {
     ChildEntity childEntity = ChildEntity.of(UserEntity.of(user), child);
+    // 애니몬을 랜덤으로 몇개만 지급
+//    List<AnimonEntity> animonEntities = animonRepository.findAllByIdIn(List.of(1,2,3,4));
     AnimonEntity animonEntity =
         animonRepository.findById(1).orElseThrow(() -> new EoullimApplicationException(ErrorCode.DB_NOT_FOUND, "애니몬 없다. "));
+    // 프로필 애니몬 선택
     childEntity.setAnimon(animonEntity);
+    // child 저장
     childRepository.save(childEntity);
 
     // 기본 애니몬 4종을 해당 Child에 부여
