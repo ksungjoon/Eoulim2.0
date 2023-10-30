@@ -3,6 +3,7 @@ package com.ssafy.eoullim.controller;
 import com.ssafy.eoullim.dto.request.ChildSchoolRequest;
 import com.ssafy.eoullim.dto.request.ChildRequest;
 import com.ssafy.eoullim.dto.response.Response;
+import com.ssafy.eoullim.dto.response.SuccessResponse;
 import com.ssafy.eoullim.model.Child;
 import com.ssafy.eoullim.model.OtherChild;
 import com.ssafy.eoullim.model.User;
@@ -10,6 +11,8 @@ import com.ssafy.eoullim.service.ChildService;
 import com.ssafy.eoullim.utils.ClassUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -58,13 +61,14 @@ public class ChildController {
   }
 
   @GetMapping("/{childId}")
-  public Response<Child> getChildInfo(
+  public ResponseEntity<SuccessResponse<Child>> getChildInfo(
       @PathVariable @NotBlank Integer childId, Authentication authentication) {
     User user =
         ClassUtils.getSafeCastInstance(
             authentication.getPrincipal(), User.class); // 현재 api를 요청한 사용자(Client)
     Child child = childService.getChildInfo(childId, user.getId());
-    return Response.success(child);
+    HttpStatus httpStatus = HttpStatus.OK;
+    return ResponseEntity.ok(new SuccessResponse<>(httpStatus.name(), String.valueOf(httpStatus.value()), child));
   }
 
   // TODO  : api url refactoring

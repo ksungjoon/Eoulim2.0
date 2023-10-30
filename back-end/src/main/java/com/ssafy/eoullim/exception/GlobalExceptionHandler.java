@@ -17,9 +17,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.io.IOException;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TimeZone;
 
 import static com.ssafy.eoullim.exception.ErrorCode.*;
 
@@ -31,9 +33,10 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> errorHandler(EoullimApplicationException e) {
     final var errorResponse =
         ErrorResponse.builder()
-            .status(e.getErrorCode().getStatus())
+            .status(e.getErrorCode().getStatus().toString())
             .code(e.getErrorCode().getCode())
             .message(e.getErrorCode().name() + " : " + e.getMessage()) // 클라이언트에게는 에러 코드만.
+            .timeStamp(ZonedDateTime.now(TimeZone.getTimeZone("Asia/Seoul").toZoneId()))
             .build();
     // 여기서 ERROR CODE 안에 있는 status랑 message, 또한 추가로 exception으로 온 message
     log.error("Error occurs {}", e.toString()); // 서버에 exception 메시지 출력
@@ -57,9 +60,10 @@ public class GlobalExceptionHandler {
 
     final var errorResponse =
         ErrorResponse.builder()
-            .status(HttpStatus.BAD_REQUEST)
+            .status(HttpStatus.BAD_REQUEST.toString())
             .code(String.valueOf(HttpStatus.BAD_REQUEST.value()))
             .message(errorMsg.toString())
+            .timeStamp(ZonedDateTime.now(TimeZone.getTimeZone("Asia/Seoul").toZoneId()))
             .build();
     log.error("Error occurs {}", e.toString());
     log.error("Error occurs in method: " + e.getStackTrace()[0]);
@@ -70,7 +74,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> badRequestHandler(IllegalArgumentException e) {
     final var errorResponse =
         ErrorResponse.builder()
-            .status(HttpStatus.BAD_REQUEST)
+            .status(HttpStatus.BAD_REQUEST.toString())
             .code(String.valueOf(HttpStatus.BAD_REQUEST.value()))
             .message(e.getMessage())
             .build();
@@ -83,7 +87,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handleAll(Exception e) {
     final var errorResponse =
         ErrorResponse.builder()
-            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .status(HttpStatus.INTERNAL_SERVER_ERROR.toString())
             .code(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()))
             .message(e.getMessage())
             .build();
@@ -96,7 +100,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> serverErrorHandler(IOException e) {
     final var errorResponse =
         ErrorResponse.builder()
-            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .status(HttpStatus.INTERNAL_SERVER_ERROR.toString())
             .code(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()))
             .message(e.getMessage())
             .build();
