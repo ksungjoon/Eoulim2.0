@@ -1,6 +1,5 @@
 package com.ssafy.eoullim.service;
 
-import com.ssafy.eoullim.dto.request.ChildRequest;
 import com.ssafy.eoullim.exception.EoullimApplicationException;
 import com.ssafy.eoullim.exception.ErrorCode;
 import com.ssafy.eoullim.model.Child;
@@ -21,9 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,12 +39,11 @@ public class ChildService {
   private final AnimonRepository animonRepository;
   private final ChildCacheRepository childCacheRepository;
 
+  // Open Api
   @Value("${public-api.service-key}")
-  private String serviceKey;
-
-  private String schoolApiUrl = "http://api.data.go.kr/openapi/tn_pubr_public_elesch_mskul_lc_api";
-
-
+  private String openApiServiceKey;
+  @Value("${public-api.url}")
+  private String openApiUrl;
 
   @Transactional
   public void create(User user, Child child) {
@@ -147,60 +148,70 @@ public class ChildService {
 
   public Boolean isValidSchoolName(String keyword) {
     try {
-      // API URL Build
-      StringBuilder urlBuilder = new StringBuilder(schoolApiUrl);
-      urlBuilder
-          .append("?")
-          .append(URLEncoder.encode("ServiceKey", "UTF-8"))
-          .append("=")
-          .append(serviceKey);
-      urlBuilder
-          .append("&")
-          .append(URLEncoder.encode("pageNo", "UTF-8"))
-          .append("=")
-          .append(URLEncoder.encode("1", "UTF-8"));
-      urlBuilder
-          .append("&")
-          .append(URLEncoder.encode("numOfRows", "UTF-8"))
-          .append("=")
-          .append(URLEncoder.encode("100", "UTF-8"));
-      urlBuilder
-          .append("&")
-          .append(URLEncoder.encode("type", "UTF-8"))
-          .append("=")
-          .append(URLEncoder.encode("json", "UTF-8"));
-      urlBuilder
-          .append("&")
-          .append(URLEncoder.encode("schoolSe", "UTF-8"))
-          .append("=")
-          .append(URLEncoder.encode("초등학교", "UTF-8"));
-      urlBuilder
-          .append("&")
-          .append(URLEncoder.encode("schoolNm", "UTF-8"))
-          .append("=")
-          .append(URLEncoder.encode(keyword + "초등학교", "UTF-8"));
+      URL url = getOpenApiUrl(keyword);
       // http connection
-      URL url = new URL(urlBuilder.toString());
       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
       conn.setRequestMethod("GET");
       conn.setRequestProperty("Content-type", "application/json");
       System.out.println("Response code: " + conn.getResponseCode());
+      // response reader
       BufferedReader rd;
       if (conn.getResponseCode() >= 200 && conn.getResponseCode() <= 300) { // success
-        rd = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+        rd = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
       } else {
-        rd = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "UTF-8"));
+        rd = new BufferedReader(new InputStreamReader(conn.getErrorStream(), StandardCharsets.UTF_8));
       }
       StringBuilder outputStringBuilder = new StringBuilder(); // output store
       String line;
       while ((line = rd.readLine()) != null) {
         outputStringBuilder.append(line);
       }
+      // disconnect
       rd.close();
       conn.disconnect();
+      // result
       return !outputStringBuilder.toString().contains("NODATA_ERROR");  // 있는 학교면 True, No Data면 False
     } catch (IOException e) { // ERROR : Http Connection (api 호출 과정에서 error)
-      throw new EoullimApplicationException(ErrorCode.OPEN_API_CONNECTION_ERROR);
+      throw new EoullimApplicationException(ErrorCode.OPEN_API_CONNECTION_ERROR, "Http Connection ERROR");
+    }
+  }
+
+  public URL getOpenApiUrl(String keyword) {
+    StringBuilder urlBuilder = new StringBuilder(openApiUrl);
+    try {
+      urlBuilder
+              .append("?")
+              .append(URLEncoder.encode("ServiceKey", StandardCharsets.UTF_8))
+              .append("=")
+              .append(openApiServiceKey);
+      urlBuilder
+              .append("&")
+              .append(URLEncoder.encode("pageNo", StandardCharsets.UTF_8))
+              .append("=")
+              .append(URLEncoder.encode("1", StandardCharsets.UTF_8));
+      urlBuilder
+              .append("&")
+              .append(URLEncoder.encode("numOfRows", StandardCharsets.UTF_8))
+              .append("=")
+              .append(URLEncoder.encode("100", StandardCharsets.UTF_8));
+      urlBuilder
+              .append("&")
+              .append(URLEncoder.encode("type", StandardCharsets.UTF_8))
+              .append("=")
+              .append(URLEncoder.encode("json", StandardCharsets.UTF_8));
+      urlBuilder
+              .append("&")
+              .append(URLEncoder.encode("schoolSe", StandardCharsets.UTF_8))
+              .append("=")
+              .append(URLEncoder.encode("초등학교", StandardCharsets.UTF_8));
+      urlBuilder
+              .append("&")
+              .append(URLEncoder.encode("schoolNm", StandardCharsets.UTF_8))
+              .append("=")
+              .append(URLEncoder.encode(keyword + "초등학교", StandardCharsets.UTF_8));
+      return new URL(urlBuilder.toString());
+    } catch (MalformedURLException e) {
+      throw new EoullimApplicationException(ErrorCode.OPEN_API_CONNECTION_ERROR, "잘못된 URL로 인해 API 요청을 보낼 수 없습니다.");
     }
   }
 }

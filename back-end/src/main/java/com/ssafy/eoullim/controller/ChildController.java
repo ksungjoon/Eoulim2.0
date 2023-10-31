@@ -44,6 +44,7 @@ public class ChildController {
       @Valid @RequestBody ChildRequest request, Authentication authentication) {
     User user = ClassUtils.getSafeCastInstance(authentication.getPrincipal(), User.class);
     childService.create(user, Child.of(request));
+
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(new SuccessResponse<>(HttpStatus.CREATED.name(), HttpStatus.CREATED.value(), null));
   }
@@ -108,7 +109,7 @@ public class ChildController {
   @PostMapping("/school")
   public ResponseEntity<SuccessResponse<?>> isValidSchoolName(
       @Valid @RequestBody ChildSchoolRequest request) {
-    final var result = childService.isValidSchoolName(request.getKeyword());
+    String result = childService.isValidSchoolName(request.getKeyword()) ? "학교 확인 성공" : "학교 확인 실패";
     return ResponseEntity.ok(new SuccessResponse<>(result));
   }
 }
