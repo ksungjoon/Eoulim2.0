@@ -123,7 +123,7 @@ public class ChildService {
   public List<Child> getChildren(Integer userId) {
     return childRepository
         .findAllByUserId(userId)
-        .orElseThrow(() -> new IllegalArgumentException("잘못된 사용자(User)입니다."))
+        .orElseThrow(() -> new EoullimApplicationException(ErrorCode.USER_NOT_FOUND))
         .stream()
         .map(Child::fromEntity)
         .collect(Collectors.toList());
