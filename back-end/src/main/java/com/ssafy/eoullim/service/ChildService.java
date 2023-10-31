@@ -78,13 +78,7 @@ public class ChildService {
     childCacheRepository.delete(childId);
   }
 
-  public Child getChildInfo(Integer childId, Integer userId) {
-    final var childEntity = getChildEntity(childId);
 
-    if (!childEntity.getUser().getId().equals(userId))
-      throw new EoullimApplicationException(ErrorCode.FORBIDDEN_NO_PERMISSION);
-    return Child.fromEntity(childEntity);
-  }
 
   @Transactional
   public void modify(Integer childId, Child child) {
@@ -126,17 +120,30 @@ public class ChildService {
 //    return Animon.fromEntity(animonEntity);
 //  }
 
+  public List<Child> getChildren(Integer userId) {
+    return childRepository
+        .findAllByUserId(userId)
+        .orElseThrow(() -> new IllegalArgumentException("잘못된 사용자(User)입니다."))
+        .stream()
+        .map(Child::fromEntity)
+        .collect(Collectors.toList());
+  }
+
+  public Child getChild(Integer childId, Integer userId) {
+    final var childEntity = getChildEntity(childId);
+
+    if (!childEntity.getUser().getId().equals(userId))
+      throw new EoullimApplicationException(ErrorCode.FORBIDDEN_NO_PERMISSION);
+    return Child.fromEntity(childEntity);
+  }
+
   public ChildEntity getChildEntity(Integer childId) {
     return childRepository
         .findById(childId)
         .orElseThrow(() -> new EoullimApplicationException(ErrorCode.CHILD_NOT_FOUND));
   }
 
-  public List<Child> getChildrenList(Integer userId) {
-    return childRepository.findAllByUserId(userId).stream()
-            .map(Child::fromEntity)
-            .collect(Collectors.toList());
-  }
+
 
   public OtherChild getParticipantInfo(Integer participantId) {
     ChildEntity participant =
@@ -146,7 +153,7 @@ public class ChildService {
     return OtherChild.fromEntity(participant);
   }
 
-  public Boolean isValidSchoolName(String keyword) {
+  public Boolean isValidSchool(String keyword) {
     try {
       URL url = getOpenApiUrl(keyword);
       // http connection

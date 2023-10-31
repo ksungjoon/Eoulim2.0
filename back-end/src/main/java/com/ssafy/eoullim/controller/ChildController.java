@@ -67,13 +67,19 @@ public class ChildController {
                 HttpStatus.NO_CONTENT.name(), HttpStatus.NO_CONTENT.value(), null));
   }
 
+  @GetMapping
+  public ResponseEntity<SuccessResponse<List<Child>>> getChildren(
+          Authentication authentication) {
+    User user = ClassUtils.getSafeCastInstance(authentication.getPrincipal(), User.class);
+    List<Child> childrenList = childService.getChildren(user.getId());
+    return ResponseEntity.ok(new SuccessResponse<>(childrenList));
+  }
+
   @GetMapping("/{childId}")
-  public ResponseEntity<SuccessResponse<Child>> getChildInfo(
+  public ResponseEntity<SuccessResponse<Child>> getChild(
       @PathVariable @NotBlank Integer childId, Authentication authentication) {
-    User user =
-        ClassUtils.getSafeCastInstance(
-            authentication.getPrincipal(), User.class); // 현재 api를 요청한 사용자(Client)
-    Child child = childService.getChildInfo(childId, user.getId());
+    User user = ClassUtils.getSafeCastInstance(authentication.getPrincipal(), User.class);
+    Child child = childService.getChild(childId, user.getId());
     return ResponseEntity.ok(new SuccessResponse<>(child));
   }
 
@@ -84,15 +90,6 @@ public class ChildController {
     OtherChild friend = childService.getParticipantInfo(participantId);
     return ResponseEntity.ok(new SuccessResponse<>(friend));
   }
-
-  @GetMapping
-  public ResponseEntity<SuccessResponse<List<Child>>> getChildrenList(
-      Authentication authentication) {
-    User user = ClassUtils.getSafeCastInstance(authentication.getPrincipal(), User.class);
-    List<Child> childrenList = childService.getChildrenList(user.getId());
-    return ResponseEntity.ok(new SuccessResponse<>(childrenList));
-  }
-
   //  @GetMapping("/{childId}/animons")
   //  public Response<List<Animon>> getAnimonList(@PathVariable @NotBlank Integer childId) {
   //    List<Animon> animonList = childService.getAnimonList(childId);
@@ -107,9 +104,9 @@ public class ChildController {
   //  }
 
   @PostMapping("/school")
-  public ResponseEntity<SuccessResponse<?>> isValidSchoolName(
+  public ResponseEntity<SuccessResponse<?>> isValidSchool(
       @Valid @RequestBody ChildSchoolRequest request) {
-    String result = childService.isValidSchoolName(request.getKeyword()) ? "학교 확인 성공" : "학교 확인 실패";
+    String result = childService.isValidSchool(request.getKeyword()) ? "학교 확인 성공" : "학교 확인 실패";
     return ResponseEntity.ok(new SuccessResponse<>(result));
   }
 }
