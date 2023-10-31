@@ -3,6 +3,7 @@ import 'package:mobile/api/api_login.dart';
 import 'package:mobile/model/request_models/put_login.dart';
 import 'package:mobile/model/response_models/general_response.dart';
 import 'package:mobile/screen/profiles/profiles_screen.dart';
+import 'package:mobile/screen/signup_screen.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -56,7 +57,7 @@ class _LoginScreenState extends State<Login> {
                       color: Colors.white.withOpacity(0.3),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    key: this.loginFormKey,
+                    key: loginFormKey,
                     child: Column(
                       children: [
                         Padding(
@@ -92,7 +93,8 @@ class _LoginScreenState extends State<Login> {
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.only(left: 20, right: 20),
+                          padding: const EdgeInsets.only(
+                              left: 20, right: 20, bottom: 20),
                           child: Form(
                             child: TextFormField(
                               obscuringCharacter: '*',
@@ -112,7 +114,7 @@ class _LoginScreenState extends State<Login> {
                                       BorderRadius.all(Radius.circular(10)),
                                 ),
                                 prefixIcon: Icon(
-                                  Icons.person,
+                                  Icons.lock,
                                   color: Colors.green,
                                 ),
                                 filled: true,
@@ -140,40 +142,58 @@ class _LoginScreenState extends State<Login> {
                       ),
                     ),
                     onPressed: () async {
-                      print(id!);
-                      print(pw!);
+                      print(id);
+                      print(pw);
 
-                      if (id!.isEmpty || pw!.isEmpty) {
+                      if (id.isEmpty || pw.isEmpty) {
                         showDialog(
                             context: context,
-                            builder: (BuildContext context) {
-                              return Dialog(
-                                child: Text("아이디와 비밀번호를 입력해주세요."),
+                            barrierDismissible: false,
+                            builder: (BuildContext ctx) {
+                              return AlertDialog(
+                                content: const Text('아이디와 비밀번호를 입력해 주세요'),
+                                actions: [
+                                  Center(
+                                      child: TextButton(
+                                          child: const Text('확인'),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          }))
+                                ],
                               );
                             });
                       } else {
                         loginFormKey.currentState?.save();
                         loginAuth = await apiLogin
                             .login(LoginRequestModel(id: id, password: pw));
-                        if (loginAuth?.statusCode == 'SUCCESS') {
+                        if (loginAuth?.status == 'OK') {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => Profiles(),
+                              builder: (context) => const Profiles(),
                             ),
                           );
                         } else {
                           showDialog(
                               context: context,
-                              builder: (BuildContext context) {
-                                return Dialog(
-                                  child: Text('알 수 없는 오류'),
+                              barrierDismissible: false,
+                              builder: (BuildContext ctx) {
+                                return AlertDialog(
+                                  content: const Text('아이디와 비밀번호를 다시 입력해주세요'),
+                                  actions: [
+                                    Center(
+                                        child: TextButton(
+                                            child: const Text('확인'),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            }))
+                                  ],
                                 );
                               });
                         }
                       }
                     },
-                    child: Text(
+                    child: const Text(
                       '로그인',
                       style: TextStyle(fontSize: 17),
                     ),
@@ -188,8 +208,14 @@ class _LoginScreenState extends State<Login> {
                         ),
                       ),
                       TextButton(
-                        onPressed: () {},
-                        child: Text(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const Signup(),
+                              ));
+                        },
+                        child: const Text(
                           '회원가입',
                           style: TextStyle(
                             color: Colors.blue,
