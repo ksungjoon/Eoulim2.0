@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile/api/api_login.dart';
 import 'package:mobile/model/request_models/put_login.dart';
 import 'package:mobile/model/response_models/general_response.dart';
-import 'package:mobile/screen/home_screen.dart';
-
-
+import 'package:mobile/screen/profiles/profiles_screen.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -32,10 +30,9 @@ class _LoginScreenState extends State<Login> {
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/login.gif'),
-            fit: BoxFit.cover,
-            opacity: 0.5
-          ),
+              image: AssetImage('assets/login.gif'),
+              fit: BoxFit.cover,
+              opacity: 0.5),
         ),
         child: SafeArea(
           child: Center(
@@ -76,11 +73,13 @@ class _LoginScreenState extends State<Login> {
                             decoration: const InputDecoration(
                               focusedBorder: UnderlineInputBorder(
                                 borderSide: BorderSide.none,
-                                borderRadius: BorderRadius.all(Radius.circular(10)),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(10)),
                               ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide.none,
-                                borderRadius: BorderRadius.all(Radius.circular(10)),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(10)),
                               ),
                               prefixIcon: Icon(
                                 Icons.person,
@@ -99,16 +98,18 @@ class _LoginScreenState extends State<Login> {
                               obscuringCharacter: '*',
                               obscureText: true,
                               onChanged: (val) {
-                                pw = val; 
+                                pw = val;
                               },
                               decoration: const InputDecoration(
                                 focusedBorder: UnderlineInputBorder(
                                   borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(10)),
                                 ),
                                 enabledBorder: UnderlineInputBorder(
                                   borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(10)),
                                 ),
                                 prefixIcon: Icon(
                                   Icons.person,
@@ -144,30 +145,31 @@ class _LoginScreenState extends State<Login> {
 
                       if (id!.isEmpty || pw!.isEmpty) {
                         showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return Dialog(
-                              child: Text("아이디와 비밀번호를 입력해주세요."),
-                            );
-                          });
+                            context: context,
+                            builder: (BuildContext context) {
+                              return Dialog(
+                                child: Text("아이디와 비밀번호를 입력해주세요."),
+                              );
+                            });
                       } else {
                         loginFormKey.currentState?.save();
-                        loginAuth = await apiLogin.login(LoginRequestModel(id: id, password: pw));
+                        loginAuth = await apiLogin
+                            .login(LoginRequestModel(id: id, password: pw));
                         if (loginAuth?.statusCode == 'SUCCESS') {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => Home(),
+                              builder: (context) => Profiles(),
                             ),
                           );
                         } else {
                           showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return Dialog(
-                                child: Text('알 수 없는 오류'),
-                              );
-                            });
+                              context: context,
+                              builder: (BuildContext context) {
+                                return Dialog(
+                                  child: Text('알 수 없는 오류'),
+                                );
+                              });
                         }
                       }
                     },

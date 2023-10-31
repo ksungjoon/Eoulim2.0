@@ -44,6 +44,7 @@ dependencies:
   validators: ^3.0.0
   flutter_native_splash: ^2.3.4
   http: ^1.1.0
+  custom_radio_grouped_button: ^2.2.1
 
 dev_dependencies:
   flutter_test:
