@@ -66,7 +66,7 @@ public class ChildService {
     //    List<AnimonEntity> animonEntities = animonRepository.findAllByIdIn(List.of(1,2,3,4));
     AnimonEntity animonEntity =
         animonRepository
-            .findById(1)
+            .findById(1L)
             .orElseThrow(() -> new EoullimApplicationException(ErrorCode.DB_NOT_FOUND, "애니몬 없다. "));
     // 프로필 애니몬 선택
     childEntity.setAnimon(animonEntity);

@@ -155,9 +155,9 @@ public class MatchService {
   }
 
   public synchronized Match startFriend(
-      Integer childId,
+      Long childId,
       String childName,
-      Integer friendId,
+      Long friendId,
       String existSessionId,
       AlarmService alarmService)
       throws OpenViduJavaClientException, OpenViduHttpException {
