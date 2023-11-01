@@ -92,9 +92,9 @@ public class MatchController {
     ) {
 
         String existSessionId = matchFriendRequest.getSessionId();
-        Integer childId = matchFriendRequest.getChildId();
+        Long childId = matchFriendRequest.getChildId();
         String childName = matchFriendRequest.getName();
-        Integer friendId = matchFriendRequest.getFriendId();
+        Long friendId = matchFriendRequest.getFriendId();
 
         Match result = null;
         try{
