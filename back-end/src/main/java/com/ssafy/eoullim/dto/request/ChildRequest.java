@@ -31,5 +31,5 @@ public class ChildRequest {
   private String school;
 
   @Range(min = 1, max = 6, message = "학년은 1에서 6 사이여야 합니다.")
-  private Integer grade;
+  private Short grade;
 }
