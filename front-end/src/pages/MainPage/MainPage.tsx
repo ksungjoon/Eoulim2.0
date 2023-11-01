@@ -55,7 +55,7 @@ const MainPage: React.FC = () => {
 
   useEffect(() => {
     if (eventSource) {
-      const eventListener = event => {
+      const eventListener = (event: any) => {
         if (event.data === 'connect completed') {
           console.log('SSE와 연결');
         } else if (event) {
