@@ -103,8 +103,8 @@ public class MatchService {
         RecordingProperties recordingProperties =
             new RecordingProperties.Builder() // 녹화 설정
                 .outputMode(Recording.OutputMode.INDIVIDUAL)
-                .resolution("640x480")
-                .frameRate(24)
+                .resolution("1280x960")
+                .frameRate(30)
                 .name("VideoInfo")
                 .build();
         Thread.sleep(3000);
@@ -120,7 +120,7 @@ public class MatchService {
     }
   }
 
-  public Recording stopRandom(  
+  public Recording stopRandom(
       String sessionId, List<Integer> guideSeq, List<String> timeline, RecordService recordService)
       throws OpenViduJavaClientException, OpenViduHttpException, IOException, ParseException {
 
@@ -164,12 +164,14 @@ public class MatchService {
       String existSessionId,
       AlarmService alarmService)
       throws OpenViduJavaClientException, OpenViduHttpException {
-    Map<String, Object> params = new HashMap<>(); // 빈 파일
-    ConnectionProperties connectionProperties = ConnectionProperties.fromJson(params).build();
+//    Map<String, Object> params = new HashMap<>(); // 빈 파일
+//    ConnectionProperties connectionProperties = ConnectionProperties.fromJson(params).build();
+
+    ConnectionProperties connectionProperties = ConnectionProperties.fromJson(new HashMap<String, Object>()).build();
 
     if (existSessionId == null) { // 존재하는 방이 없을 때
-      LocalDateTime now = LocalDateTime.now();
-      String formatNow = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+//      LocalDateTime now = LocalDateTime.now();
+      String formatNow = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
       String sessionId = childId.toString() + "_" + formatNow; // sessionId 결정
 
       if (this.mapSessions.get(sessionId) != null) { // 만드려는 세션 Id가 이미 존재하는지
@@ -216,8 +218,8 @@ public class MatchService {
           RecordingProperties recordingProperties =
               new RecordingProperties.Builder() // 녹화 설정
                   .outputMode(Recording.OutputMode.INDIVIDUAL)
-                  .resolution("640x480")
-                  .frameRate(24)
+                  .resolution("1280x960")
+                  .frameRate(30)
                   .name("VideoInfo")
                   .build();
           Recording recording = openvidu.startRecording(sessionId, recordingProperties); // 녹화 시작
