@@ -38,7 +38,7 @@ public class FollowService {
             .orElseThrow(() -> new EoullimApplicationException(ErrorCode.CHILD_NOT_FOUND));
 
     followRepository
-        .findByChildAndFollowing(child, friend) // 이미 좋아요 누른 친구인 경우
+        .findByChildAndFollowingChild(child, friend) // 이미 좋아요 누른 친구인 경우
         .ifPresent(
             it -> {
               throw new EoullimApplicationException(ErrorCode.DUPLICATED_FRIEND);
