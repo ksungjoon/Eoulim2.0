@@ -20,9 +20,9 @@ import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 @Slf4j
-@RestController
-@RequestMapping("/api/v1/children")
 @RequiredArgsConstructor
+@RequestMapping("/api/v1/children")
+@RestController
 public class ChildController {
 
   private final ChildService childService;
