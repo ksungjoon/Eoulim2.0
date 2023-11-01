@@ -39,7 +39,7 @@ public class UserService {
                         () -> new EoullimApplicationException(ErrorCode.USER_NOT_FOUND)));
     }
 
-    public void join(String username, String password, String name, String phoneNumber) {
+    public User join(String username, String password, String name, String phoneNumber) {
         userRepository.findByUsername(username).ifPresent(it -> {
             throw new EoullimApplicationException(ErrorCode.DUPLICATED_NAME);
         });
@@ -52,6 +52,7 @@ public class UserService {
                         .role(UserRole.USER)
                         .build()
         );
+        return new User();
     }
 
     public String login(String username, String password) {
@@ -77,11 +78,11 @@ public class UserService {
         return "BlackList:" + username;
     }
 
-    public boolean checkId(String username) {
-        return userRepository.findByUsername(username).isPresent();
+    public Boolean isAvailableUsername(String username) {
+        return userRepository.findByUsername(username).isEmpty();
     }
 
-    public boolean checkPw(String pwRequest, String pwCorrect) {
+    public Boolean isCorrectPassword(String pwRequest, String pwCorrect) {
         return encoder.matches(pwRequest, pwCorrect);
     }
 
