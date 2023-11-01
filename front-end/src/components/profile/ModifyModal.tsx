@@ -185,8 +185,8 @@ const ModifyModal: React.FC<ModifyModalProps> = ({ onClose, childId, resetList }
           },
         },
       );
-      setIsSchoolCorrect(response.data.resultCode);
-      if (response.data.resultCode) {
+      setIsSchoolCorrect(response.data.data);
+      if (response.data.data) {
         Swal.fire({
           text: '올바른 학교정보입니다!',
           icon: 'success',
