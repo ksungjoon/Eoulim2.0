@@ -19,7 +19,7 @@ public class ChildEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false, length = 4)
+    @Column(nullable = false, length = 17)
     private String name;
 
     @Column(nullable = false)
