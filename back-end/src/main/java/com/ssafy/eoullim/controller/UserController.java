@@ -49,36 +49,28 @@ public class UserController {
     }
 
     @GetMapping("/logout")
-    public Response<Void> logout(Authentication authentication) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseBody
+    public SuccessResponse<?> logout(Authentication authentication) {
         userService.logout(authentication.getName());
-        return Response.success(HttpStatus.OK, "logout completed");
+        return new SuccessResponse<>(HttpStatus.NO_CONTENT,"로그아웃 성공!");
     }
 
     @GetMapping("/check-username/{username}")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public SuccessResponse<?> checkUsername(@PathVariable @NotBlank String username) {
-        boolean duplicate = userService.checkId(username);
-        if(duplicate) {
-            return new SuccessResponse<>("duplicated");
-        }
-        else {
-            return new SuccessResponse<>("available");
-        }
+    public SuccessResponse<?> isAvailableUsername(@PathVariable @NotBlank String username) {
+        final var isAvailable = userService.isAvailableUsername(username);
+        return new SuccessResponse<>(isAvailable);
     }
 
     @PostMapping("/check-password")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public SuccessResponse<?> checkPassword(@Valid @RequestBody UserPwCheckRequest request, Authentication authentication) {
+    public SuccessResponse<?> isCorrectPassword(@Valid @RequestBody UserPwCheckRequest request, Authentication authentication) {
         User user = ClassUtils.getSafeCastInstance(authentication.getPrincipal(), User.class);
-        boolean correct = userService.checkPw(request.getPassword(), user.getPassword());
-        if(correct) {
-            return new SuccessResponse<>("correct");
-        }
-        else {
-            return new SuccessResponse<>("wrong");
-        }
+        final var isCorrect = userService.isCorrectPassword(request.getPassword(), user.getPassword());
+        return new SuccessResponse<>(isCorrect);
     }
 
     @PatchMapping("/password")
