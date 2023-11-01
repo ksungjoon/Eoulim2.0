@@ -25,7 +25,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class MatchService {
   @Value("${OPENVIDU_URL}")
@@ -121,7 +120,7 @@ public class MatchService {
     }
   }
 
-  public Recording stopRandom(
+  public Recording stopRandom(  
       String sessionId, List<Integer> guideSeq, List<String> timeline, RecordService recordService)
       throws OpenViduJavaClientException, OpenViduHttpException, IOException, ParseException {
 
