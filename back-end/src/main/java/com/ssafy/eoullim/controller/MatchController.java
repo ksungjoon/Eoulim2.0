@@ -68,7 +68,7 @@ public class MatchController {
         Recording recording = null;
 
         try{
-            recording = matchService.stopRandom(sessionId, "guideSeq", "timeline", recordService);
+            recording = matchService.stopRandom(sessionId, guideSeq, timeline, recordService);
         } catch (OpenViduJavaClientException e) {
             log.info(e.getMessage());
             throw new RuntimeException(e);
