@@ -34,7 +34,7 @@ public class ChildEntity extends BaseEntity {
     @Column(nullable = false, length = 20)
     private String school;
 
-    @Column(nullable = false, columnDefinition = "TINYINT UNSIGNED")
+    @Column(nullable = false, columnDefinition = "TINYINT(1) UNSIGNED")
     @Range(min = 1, max = 6)
     private Short grade;
 
