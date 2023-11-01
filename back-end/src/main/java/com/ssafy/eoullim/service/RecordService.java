@@ -82,14 +82,14 @@ public class RecordService {
             int userId = Integer.parseInt((String)clientData.get("childId"));
             ChildEntity user = childRepository.findById(userId).orElseThrow();
 
-            if(room.getChildOne().intValue() == userId){ // 영상의 주인이 첫번째 사람
-                ChildEntity participant = childRepository.findById(room.getChildTwo()).orElseThrow();
-                recordRepository.save(RecordEntity.of(downFolder+name, user, participant, room.getGuideSeq(), room.getTimeline()));
-            }
-            if(room.getChildTwo().intValue() == userId){ // 영상의 주인이 두번째 사람
-                ChildEntity participant = childRepository.findById(room.getChildOne()).orElseThrow();
-                recordRepository.save(RecordEntity.of(downFolder+name, user, participant, room.getGuideSeq(), room.getTimeline()));
-            }
+//            if(room.getChildOne().intValue() == userId){ // 영상의 주인이 첫번째 사람
+//                ChildEntity participant = childRepository.findById(room.getChildTwo()).orElseThrow();
+//                recordRepository.save(RecordEntity.of(downFolder+name, user, participant, room.getGuideSeq(), room.getTimeline()));
+//            }
+//            if(room.getChildTwo().intValue() == userId){ // 영상의 주인이 두번째 사람
+//                ChildEntity participant = childRepository.findById(room.getChildOne()).orElseThrow();
+//                recordRepository.save(RecordEntity.of(downFolder+name, user, participant, room.getGuideSeq(), room.getTimeline()));
+//            }
 
         }
         /* JSON Parse 종료 */
