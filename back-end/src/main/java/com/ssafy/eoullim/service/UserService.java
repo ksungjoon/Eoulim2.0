@@ -39,11 +39,14 @@ public class UserService {
                         () -> new EoullimApplicationException(ErrorCode.USER_NOT_FOUND)));
     }
 
+    @Transactional
     public User join(String username, String password, String name, String phoneNumber) {
+        // Exception: User 중복 가입 방지
         userRepository.findByUsername(username).ifPresent(it -> {
             throw new EoullimApplicationException(ErrorCode.DUPLICATED_NAME);
         });
-        userRepository.save(
+        // save new user
+        UserEntity newUserEntity = userRepository.save(
                 UserEntity.builder()
                         .username(username)
                         .password(encoder.encode(password))
@@ -52,7 +55,8 @@ public class UserService {
                         .role(UserRole.USER)
                         .build()
         );
-        return new User();
+        // return new user saved in DB
+        return User.fromEntity(newUserEntity);
     }
 
     public String login(String username, String password) {
