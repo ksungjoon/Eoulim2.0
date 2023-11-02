@@ -33,12 +33,6 @@ public class UserService {
     @Value("${jwt.token.expired-time-ms}")
     private Long expiredTimeMs;
 
-    public User loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userCacheRepository.getUser(username).orElseGet(
-                () -> userRepository.findByUsername(username).map(User::fromEntity).orElseThrow(
-                        () -> new EoullimApplicationException(ErrorCode.USER_NOT_FOUND)));
-    }
-
     @Transactional
     public User join(String username, String password, String name, String phoneNumber) {
         // Exception: User 중복 가입 방지
@@ -70,6 +64,12 @@ public class UserService {
             throw new EoullimApplicationException(ErrorCode.INVALID_PASSWORD);
         }
         return JwtTokenUtils.generateAccessToken(username, secretKey, expiredTimeMs);
+    }
+
+    public User loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userCacheRepository.getUser(username).orElseGet(
+                () -> userRepository.findByUsername(username).map(User::fromEntity).orElseThrow(
+                        () -> new EoullimApplicationException(ErrorCode.USER_NOT_FOUND)));
     }
 
     public void logout(String username) {
