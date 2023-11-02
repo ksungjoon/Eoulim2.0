@@ -51,36 +51,42 @@ public class ChildController {
     return new SuccessResponse<>(HttpStatus.CREATED, child);
   }
 
+  @GetMapping
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public SuccessResponse<List<Child>> getChildren(Authentication authentication) {
+    User user = ClassUtils.getSafeCastInstance(authentication.getPrincipal(), User.class);
+    List<Child> childrenList = childService.getChildren(user.getId());
+    return new SuccessResponse<>(childrenList);
+  }
+
+  @GetMapping("/{childId}")
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public SuccessResponse<Child> getChild(
+      @PathVariable @NotBlank Long childId, Authentication authentication) {
+    User user = ClassUtils.getSafeCastInstance(authentication.getPrincipal(), User.class);
+    Child child = childService.getChild(childId, user.getId());
+    return new SuccessResponse<>(child);
+  }
+
   @PutMapping("/{childId}")
-  public ResponseEntity<?> modify(
-      @PathVariable @NotBlank Long childId, @Valid @RequestBody ChildRequest request) {
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @ResponseBody
+  public SuccessResponse<?> modify(
+          @PathVariable @NotBlank Long childId, @Valid @RequestBody ChildRequest request) {
     childService.modify(childId, Child.of(request));
-    return ResponseEntity.ok(new SuccessResponse<>(null));
+    return new SuccessResponse<>(null);
   }
 
   @DeleteMapping("/{childId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @ResponseBody
   public SuccessResponse<?> delete(
-      @PathVariable @NotBlank Long childId, Authentication authentication) {
+          @PathVariable @NotBlank Long childId, Authentication authentication) {
     User user = ClassUtils.getSafeCastInstance(authentication.getPrincipal(), User.class);
     childService.delete(childId, user.getId());
     return new SuccessResponse<>(HttpStatus.NO_CONTENT, null);
-  }
-
-  @GetMapping
-  public ResponseEntity<SuccessResponse<List<Child>>> getChildren(Authentication authentication) {
-    User user = ClassUtils.getSafeCastInstance(authentication.getPrincipal(), User.class);
-    List<Child> childrenList = childService.getChildren(user.getId());
-    return ResponseEntity.ok(new SuccessResponse<>(childrenList));
-  }
-
-  @GetMapping("/{childId}")
-  public ResponseEntity<SuccessResponse<Child>> getChild(
-      @PathVariable @NotBlank Long childId, Authentication authentication) {
-    User user = ClassUtils.getSafeCastInstance(authentication.getPrincipal(), User.class);
-    Child child = childService.getChild(childId, user.getId());
-    return ResponseEntity.ok(new SuccessResponse<>(child));
   }
 
   // TODO  : api url refactoring
@@ -91,8 +97,9 @@ public class ChildController {
     return ResponseEntity.ok(new SuccessResponse<>(friend));
   }
 
-  @PostMapping("/school")
+  @PostMapping("/check-school")
   @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
   public SuccessResponse<?> isValidSchool(
       @Valid @RequestBody ChildSchoolRequest request) {
     final var isValidSchool = childService.isValidSchool(request.getKeyword());
