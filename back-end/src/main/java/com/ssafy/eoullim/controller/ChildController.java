@@ -7,6 +7,7 @@ import com.ssafy.eoullim.model.Child;
 import com.ssafy.eoullim.model.OtherChild;
 import com.ssafy.eoullim.model.User;
 import com.ssafy.eoullim.service.ChildService;
+import com.ssafy.eoullim.service.FcmTokenService;
 import com.ssafy.eoullim.utils.ClassUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,8 @@ import java.util.List;
 @RestController
 public class ChildController {
 
-  private final ChildService childService;
+    private final ChildService childService;
+    private final FcmTokenService fcmTokenService;
 
   @PostMapping("/login/{childId}")
   public ResponseEntity<?> login(@PathVariable @NotBlank Long childId) {
@@ -83,7 +85,7 @@ public class ChildController {
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @ResponseBody
   public SuccessResponse<?> delete(
-          @PathVariable @NotBlank Long childId, Authentication authentication) {
+      @PathVariable @NotBlank Long childId, Authentication authentication) {
     User user = ClassUtils.getSafeCastInstance(authentication.getPrincipal(), User.class);
     childService.delete(childId, user.getId());
     return new SuccessResponse<>(HttpStatus.NO_CONTENT, null);
