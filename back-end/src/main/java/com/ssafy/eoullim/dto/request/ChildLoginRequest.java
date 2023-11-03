@@ -5,12 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 public class ChildLoginRequest {
-    @NotBlank
+    @NotNull
     private Long childId;
     @NotBlank
     private String fcmToken;
