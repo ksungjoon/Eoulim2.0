@@ -3,6 +3,7 @@ package com.ssafy.eoullim.service;
 import com.ssafy.eoullim.exception.EoullimApplicationException;
 import com.ssafy.eoullim.exception.ErrorCode;
 import com.ssafy.eoullim.model.Child;
+import com.ssafy.eoullim.model.Follow;
 import com.ssafy.eoullim.model.Status;
 import com.ssafy.eoullim.model.entity.ChildEntity;
 import com.ssafy.eoullim.model.entity.FollowEntity;
@@ -47,25 +48,8 @@ public class FollowService {
     followRepository.save(FollowEntity.of(child, friend));
   }
 
-  public List<Child> getFriends(Long childId, Long userId) {
-
-    ChildEntity childEntity =
-        childRepository
-            .findById(childId)
-            .orElseThrow(() -> new EoullimApplicationException(ErrorCode.CHILD_NOT_FOUND));
-
-    if (!childEntity.getUser().getId().equals(userId)) { // user가 해당 child에 권한이 없는 경우
-      throw new EoullimApplicationException(ErrorCode.FORBIDDEN_NO_PERMISSION);
-    }
-
-    List<Child> friends =
-        followRepository.findFollowingsByChild(childEntity).stream()
-            .map(Child::fromEntity)
-            .collect(Collectors.toList());
-    for (Child friend : friends) {
-      if (childCacheRepository.isON(friend.getId())) friend.setStatus(Status.ON);
-      else friend.setStatus(Status.OFF);
-    }
-    return friends;
+  public List<Follow> getFollowsByChild(Child child) {
+    List<FollowEntity> followEntities = followRepository.findByChild(ChildEntity.of(child));
+    return followEntities.stream().map(Follow::fromEntity).collect(Collectors.toList());
   }
 }

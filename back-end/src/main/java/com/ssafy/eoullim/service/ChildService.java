@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 public class ChildService {
   private final AnimonService animonService;
   private final ChildAnimonService childAnimonService;
+  private final FollowService followService;
 
   private final ChildRepository childRepository;
   //  private final ChildAnimonRepository childAnimonRepository;
@@ -136,6 +137,13 @@ public class ChildService {
     // 왜 나는 이거 안하면 저장 안되지?
     childRepository.save(childEntity);
     return Animon.fromEntity(animonEntity);
+  }
+
+  // Following하는 친구들 불러오기
+  public List<Child> getFriends(Long childId, User user) {
+    Child child = getChild(childId, user.getId());
+    List<Follow> follows = followService.getFollowsByChild(child);
+    return follows.stream().map(Follow::getFollowingChild).collect(Collectors.toList());
   }
 
   public OtherChild getOtherChild(Long participantId) {

@@ -30,13 +30,4 @@ public class FollowController {
         followService.create(request.getChildId(), request.getFollowingChildId());
         return new SuccessResponse<>(HttpStatus.CREATED, null);
     }
-
-    @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public SuccessResponse<List<Child>> getFriendsList(@Valid @RequestBody FollowRequest request, Authentication authentication) {
-        User user = ClassUtils.getSafeCastInstance(authentication.getPrincipal(), User.class);
-        List<Child> friendList = followService.getFriends(request.getChildId(), user.getId());
-        return new SuccessResponse<>(friendList);
-    }
 }
