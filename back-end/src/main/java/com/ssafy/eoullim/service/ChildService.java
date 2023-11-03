@@ -9,10 +9,11 @@ import com.ssafy.eoullim.model.entity.AnimonEntity;
 import com.ssafy.eoullim.model.entity.ChildEntity;
 import com.ssafy.eoullim.model.entity.FcmTokenEntity;
 import com.ssafy.eoullim.model.entity.UserEntity;
-import com.ssafy.eoullim.repository.AnimonRepository;
+import com.ssafy.eoullim.repository.jpa.AnimonRepository;
 import com.ssafy.eoullim.repository.ChildCacheRepository;
 import com.ssafy.eoullim.repository.ChildRepository;
 import com.ssafy.eoullim.repository.FcmTokenRepository;
+import com.ssafy.eoullim.repository.jpa.ChildRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -78,18 +78,23 @@ public class ChildService {
 
     @Transactional
     public Child create(User user, Child child) {
+        // 저장할 ChildEntity 생성
         ChildEntity childEntity = ChildEntity.of(UserEntity.of(user), child);
+
         // 애니몬을 랜덤으로 몇개만 지급
         //    List<AnimonEntity> animonEntities = animonRepository.findAllByIdIn(List.of(1,2,3,4));
+
+        // 기본 프로필 애니몬 선택
         AnimonEntity animonEntity =
                 animonRepository
                         .findById(1L)
                         .orElseThrow(() -> new EoullimApplicationException(ErrorCode.DB_NOT_FOUND, "애니몬 없다. "));
-        // 프로필 애니몬 선택
         childEntity.setAnimon(animonEntity);
+
+        final var newChildEntity = childRepository.save(childEntity);
+
         // child 저장
         log.error(childEntity.toString());
-        childRepository.save(childEntity);
 
         // 기본 애니몬 4종을 해당 Child에 부여
         //    List<AnimonEntity> animons = animonRepository.getDefaultAnimon();
@@ -97,13 +102,14 @@ public class ChildService {
         //      if (animonEntity.getId() == 1) childEntity.setAnimon(animonEntity); // 4종 중 1번 애니몬을 선택
         //      childAnimonRepository.save(ChildAnimonEntity.of(childEntity, animonEntity));
         //    }
-        return Child.fromEntity(childEntity);
+        return Child.fromEntity(newChildEntity);
     }
 
     @Transactional
-    public void modify(Long childId, Child child) {
+    public Child modify(Long childId, Child child) {
         final var childEntity = getChildEntity(childId);
         childEntity.modify(child);
+        return Child.fromEntity(childEntity);
     }
 
     @Transactional
