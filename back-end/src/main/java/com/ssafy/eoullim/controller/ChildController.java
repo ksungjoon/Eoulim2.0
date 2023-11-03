@@ -125,12 +125,12 @@ public class ChildController {
    * Child follow
    * Child의 정보 중 팔로우 관련 API
    */
-  @GetMapping
+  @GetMapping("/{childId}/follows")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  public SuccessResponse<List<Child>> getFriendsList(@Valid @RequestBody FollowRequest request, Authentication authentication) {
+  public SuccessResponse<List<Child>> getFriendsList(@PathVariable @NotBlank Long childId, Authentication authentication) {
     User user = ClassUtils.getSafeCastInstance(authentication.getPrincipal(), User.class);
-    List<Child> friendList = childService.getFriends(request.getChildId(), user);
+    List<Child> friendList = childService.getFriends(childId, user);
     return new SuccessResponse<>(friendList);
   }
 
