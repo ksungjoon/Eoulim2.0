@@ -6,6 +6,7 @@ import { Client } from '@stomp/stompjs';
 import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
 import instance from 'apis/instance';
+import { getAnimon } from 'apis/sessionApis';
 import Loading from '../../components/stream/Loading';
 import { useOpenVidu } from '../../hooks/useOpenVidu';
 import { StreamCanvas } from '../../components/stream/StreamCanvas';
@@ -160,7 +161,16 @@ const SessionPage = () => {
 
   useEffect(() => {
     if (subscriberId) {
-      getAnimon();
+      getAnimon({
+        subscriberId,
+        onSuccess: data => {
+          setSubscriberAnimonURL(`${data.profileAnimon.name}mask.png`);
+          setSubscriberName(data.name);
+        },
+        onError: () => {
+          console.log('상대방의 애니몬을 불러올 수 없습니다.');
+        },
+      });
     }
   }, [subscriberId]);
 
@@ -256,16 +266,14 @@ const SessionPage = () => {
     };
   }, []);
 
-  useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
-    window.getTokenFromApp = (message: Message) => {
-      console.log(`Flutter to Web : ${message}`);
-      if (message.token !== 'null') {
-        setUserToken(message.token);
-      }
-    };
-  });
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  window.getTokenFromApp = async (message: Message) => {
+    console.log(`Flutter to Web : ${message}`);
+    if (message.token !== 'null') {
+      await setUserToken(message.token);
+    }
+  };
 
   const getFriends = async () => {
     console.log(profileId);
@@ -291,21 +299,6 @@ const SessionPage = () => {
     //       console.log('친구목록불러오기오류', error);
     //     }
     //   });
-  };
-
-  const getAnimon = async () => {
-    try {
-      const response = await instance.get(`/children/participant/${subscriberId}`);
-      console.log('유저 정보 가져오기 성공!');
-      console.log(response);
-      setSubscriberAnimonURL(`${response.data.result.animon.name}mask.png`);
-      setSubscriberName(response.data.result.name);
-      // return response.data.result;
-    } catch (error) {
-      console.log('유저 정보 가져오기 실패ㅠ');
-      console.log(error);
-      throw error;
-    }
   };
 
   const leaveSession = () => {
