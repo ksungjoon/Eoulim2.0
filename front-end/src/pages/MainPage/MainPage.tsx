@@ -79,8 +79,11 @@ const MainPage: React.FC = () => {
   const profileLogin = () => {
     axios
       .post(
-        `${API_BASE_URL}/children/login/${profileId}`,
-        {},
+        `${API_BASE_URL}/children/login`,
+        {
+          childId: profileId,
+          fcmToken: 'null',
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`,

@@ -6,6 +6,7 @@ import { Client } from '@stomp/stompjs';
 import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
 import instance from 'apis/instance';
+import { useWebSocket } from 'hooks/useWebSocket';
 import Loading from '../../components/stream/Loading';
 import { useOpenVidu } from '../../hooks/useOpenVidu';
 import { StreamCanvas } from '../../components/stream/StreamCanvas';
@@ -35,8 +36,8 @@ import {
   GuideScript,
   TimeStamp,
 } from '../../atoms/Session';
-import { WS_BASE_URL } from '../../apis/urls';
-import { WebSocketApis } from '../../apis/webSocketApis';
+// import { WS_BASE_URL } from '../../apis/urls';
+// import { WebSocketApis } from '../../apis/webSocketApis';
 import EndModal from '../../components/stream/EndModal';
 import { destroySession } from '../../apis/openViduApis';
 
@@ -97,8 +98,7 @@ const SessionPage = () => {
     setOpen(isTrue);
   };
 
-  const [connected, setConnected] = useState<boolean>(false);
-  const [stompClient, setStompClient] = useState<Client | null>(null);
+  const [client, setClient] = useState<Client | null>(null);
 
   useEffect(() => {
     setPublisherVideoStatus(isFalse);
@@ -192,60 +192,94 @@ const SessionPage = () => {
     }
   }, [publisherGuideStatus, subscriberGuideStatus]);
 
-  useEffect(() => {
-    if (session) {
-      const client = new Client({
-        connectHeaders: WebSocketApis.getInstance().header,
-        brokerURL: WS_BASE_URL,
-        reconnectDelay: 5000,
-        debug: str => console.log(str),
+  useWebSocket({
+    onConnect(_, client) {
+      setClient(client);
+      client.subscribe(`/topic/${session.sessionId}/animon`, response => {
+        console.log('메시지 수신:', response.body);
+        const message = JSON.parse(response.body);
+        if (message.childId !== String(publisherId)) {
+          console.log(message.childId, message.isAnimonOn);
+          console.log('상대방이 화면을 껐습니다.');
+          // setSubscriberId(message.childId);
+          setSubscriberVideoStatus(message.isAnimonOn);
+        }
       });
+      client.subscribe(`/topic/${session.sessionId}/guide`, response => {
+        const message = JSON.parse(response.body);
+        console.log(message);
+        if (message.childId !== String(publisherId)) {
+          // setSubscriberId(message.childId);
+          setSubscriberGuideStatus(message.isNextGuideOn);
+        }
+      });
+      client.subscribe(`/topic/${session.sessionId}/leave-session`, response => {
+        const message = JSON.parse(response.body);
+        console.log(message);
+        if (message.childId !== String(publisherId)) {
+          setOpen(isTrue);
+        }
+      });
+    },
+    beforeDisconnected() {
+      setClient(null);
+    },
+  });
 
-      client.onConnect = () => {
-        console.log('WebSocket 연결됨');
-        setConnected(true);
-        setStompClient(client);
+  // useEffect(() => {
+  //   if (session) {
+  //     const client = new Client({
+  //       connectHeaders: WebSocketApis.getInstance().header,
+  //       brokerURL: WS_BASE_URL,
+  //       reconnectDelay: 5000,
+  //       debug: str => console.log(str),
+  //     });
 
-        client.subscribe(`/topic/${session.sessionId}/animon`, response => {
-          console.log('메시지 수신:', response.body);
-          const message = JSON.parse(response.body);
-          if (message.childId !== String(publisherId)) {
-            console.log(message.childId, message.isAnimonOn);
-            console.log('상대방이 화면을 껐습니다.');
-            // setSubscriberId(message.childId);
-            setSubscriberVideoStatus(message.isAnimonOn);
-          }
-        });
-        client.subscribe(`/topic/${session.sessionId}/guide`, response => {
-          const message = JSON.parse(response.body);
-          console.log(message);
-          if (message.childId !== String(publisherId)) {
-            // setSubscriberId(message.childId);
-            setSubscriberGuideStatus(message.isNextGuideOn);
-          }
-        });
-        client.subscribe(`/topic/${session.sessionId}/leave-session`, response => {
-          const message = JSON.parse(response.body);
-          console.log(message);
-          if (message.childId !== String(publisherId)) {
-            setOpen(isTrue);
-          }
-        });
-      };
+  //     client.onConnect = () => {
+  //       console.log('WebSocket 연결됨');
+  //       setConnected(true);
+  //       setStompClient(client);
 
-      client.onDisconnect = () => {
-        console.log('WebSocket 연결 닫힘');
-        setConnected(isFalse);
-        setStompClient(null);
-      };
+  //       client.subscribe(`/topic/${session.sessionId}/animon`, response => {
+  //         console.log('메시지 수신:', response.body);
+  //         const message = JSON.parse(response.body);
+  //         if (message.childId !== String(publisherId)) {
+  //           console.log(message.childId, message.isAnimonOn);
+  //           console.log('상대방이 화면을 껐습니다.');
+  //           // setSubscriberId(message.childId);
+  //           setSubscriberVideoStatus(message.isAnimonOn);
+  //         }
+  //       });
+  //       client.subscribe(`/topic/${session.sessionId}/guide`, response => {
+  //         const message = JSON.parse(response.body);
+  //         console.log(message);
+  //         if (message.childId !== String(publisherId)) {
+  //           // setSubscriberId(message.childId);
+  //           setSubscriberGuideStatus(message.isNextGuideOn);
+  //         }
+  //       });
+  //       client.subscribe(`/topic/${session.sessionId}/leave-session`, response => {
+  //         const message = JSON.parse(response.body);
+  //         console.log(message);
+  //         if (message.childId !== String(publisherId)) {
+  //           setOpen(isTrue);
+  //         }
+  //       });
+  //     };
 
-      client.activate();
+  //     client.onDisconnect = () => {
+  //       console.log('WebSocket 연결 닫힘');
+  //       setConnected(isFalse);
+  //       setStompClient(null);
+  //     };
 
-      return () => {
-        client.deactivate();
-      };
-    }
-  }, [streamList]);
+  //     client.activate();
+
+  //     return () => {
+  //       client.deactivate();
+  //     };
+  //   }
+  // }, [streamList]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -308,13 +342,13 @@ const SessionPage = () => {
 
   const leaveSession = () => {
     setOpen(false);
-    if (connected && stompClient) {
+    if (client) {
       const jsonMessage = {
         childId: String(publisherId),
         isLeft: true,
       };
       const message = JSON.stringify(jsonMessage);
-      stompClient.publish({
+      client.publish({
         destination: `/app/${session.sessionId}/leave-session`,
         body: message,
       });
@@ -359,8 +393,8 @@ const SessionPage = () => {
   };
 
   const changeVideoStatus = () => {
-    console.log(stompClient);
-    if (connected && stompClient) {
+    console.log(client);
+    if (client) {
       const isAnimonOn = !publisherVideoStatus;
       setPublisherVideoStatus(isAnimonOn);
       const jsonMessage = {
@@ -368,7 +402,7 @@ const SessionPage = () => {
         isAnimonOn,
       };
       const message = JSON.stringify(jsonMessage);
-      stompClient.publish({
+      client.publish({
         destination: `/app/${session.sessionId}/animon`,
         body: message,
       });
@@ -383,7 +417,7 @@ const SessionPage = () => {
   const nextGuidance = () => {
     if (clickEnabled) {
       setClickEnabled(false); // 클릭 비활성화
-      if (connected && stompClient) {
+      if (client) {
         const isNextGuideOn = !publisherGuideStatus;
         setPublisherGuideStatus(isNextGuideOn);
         const jsonMessage = {
@@ -391,7 +425,7 @@ const SessionPage = () => {
           isNextGuideOn,
         };
         const message = JSON.stringify(jsonMessage);
-        stompClient.publish({
+        client.publish({
           destination: `/app/${session.sessionId}/guide`,
           body: message,
         });
