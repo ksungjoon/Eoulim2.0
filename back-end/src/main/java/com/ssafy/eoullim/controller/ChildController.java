@@ -55,7 +55,7 @@ public class ChildController {
   public SuccessResponse<?> create(
       @Valid @RequestBody ChildRequest request, Authentication authentication) {
     User user = ClassUtils.getSafeCastInstance(authentication.getPrincipal(), User.class);
-    log.error(user.toString());
+    log.info(user.toString());
     final var child = childService.create(user, Child.of(request));
 
     return new SuccessResponse<>(HttpStatus.CREATED, child);
