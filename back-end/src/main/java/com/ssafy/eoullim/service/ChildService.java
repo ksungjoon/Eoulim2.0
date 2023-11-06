@@ -23,17 +23,15 @@ public class ChildService {
 
   private final ChildRepository childRepository;
   private final ChildAnimonRepository childAnimonRepository;
-  private final AnimonRepository animonRepository;
   private final ChildCacheRepository childCacheRepository;
   private final FcmTokenRepository fcmTokenRepository;
   private final FollowRepository followRepository;
 
   @Transactional
   public Child login(Long childId, String token, Long userId) {
-    final var childEntity = getChildEntity(childId);
-    if (!childEntity.getUser().getId().equals(userId))
-      throw new EoullimApplicationException(ErrorCode.FORBIDDEN_NO_PERMISSION);
-    childCacheRepository.setStatus(childId);
+    final var child = getChildWithUser(childId, userId);
+    final var childEntity = ChildEntity.of(child);
+    childCacheRepository.setStatus(childEntity.getId());
     fcmTokenRepository.save(
         FcmTokenEntity.builder()
             .user(childEntity.getUser())
@@ -45,14 +43,12 @@ public class ChildService {
 
   @Transactional
   public void logout(Long childId, Long userId) {
-    final var childEntity = getChildEntity(childId);
-    if (!childEntity.getUser().getId().equals(userId))
-      throw new EoullimApplicationException(ErrorCode.FORBIDDEN_NO_PERMISSION);
-    childCacheRepository.delete(childId);
+    final var child = getChildWithUser(childId, userId);
+    childCacheRepository.delete(child.getId());
     FcmTokenEntity fcmToken =
         fcmTokenRepository
-            .findByChildId(childId)
-            .orElseThrow(() -> new EoullimApplicationException(ErrorCode.FCM_TOKEN_NOT_FOUNT));
+            .findByChildId(child.getId())
+            .orElseThrow(() -> new EoullimApplicationException(ErrorCode.FCM_TOKEN_NOT_FOUND));
     fcmTokenRepository.delete(fcmToken);
   }
 
@@ -77,9 +73,10 @@ public class ChildService {
   }
 
   @Transactional
-  public Child modify(Long childId, Child child) {
-    final var childEntity = getChildEntity(childId);
-    childEntity.modify(child);
+  public Child modify(Long childId, Child changedChild, Long userId) {
+    Child child = getChildWithUser(childId, userId);
+    ChildEntity childEntity = ChildEntity.of(child);
+    childEntity.modify(changedChild);
     return Child.fromEntity(childEntity);
   }
 
@@ -89,6 +86,7 @@ public class ChildService {
         childRepository
             .findByIdAndUserId(childId, userId)
             .orElseThrow(() -> new EoullimApplicationException(ErrorCode.FORBIDDEN_NO_PERMISSION));
+    log.info(childEntity.getId()+" "+childEntity.getUser().getId());
     childRepository.delete(childEntity);
   }
 
@@ -101,9 +99,9 @@ public class ChildService {
         .collect(Collectors.toList());
   }
 
-  public Child getChild(Long childId, Long userId) {
-    final var childEntity = getChildEntity(childId); // 일단 실제 있는 Child인지 조회
-    // 그 Child가 User의 Child인지
+  public Child getChildWithUser(Long childId, Long userId) {
+    final var childEntity = getChildEntity(childId); // Child Entity 조회
+    // 접근 권한이 있는 Child인지 체크
     if (!childEntity.getUser().getId().equals(userId))
       throw new EoullimApplicationException(ErrorCode.FORBIDDEN_NO_PERMISSION);
     return Child.fromEntity(childEntity);
@@ -115,17 +113,23 @@ public class ChildService {
         .orElseThrow(() -> new EoullimApplicationException(ErrorCode.CHILD_NOT_FOUND));
   }
 
-  public List<Animon> getAnimonList(Long childId) {
+  /**
+   * Child - Animon 관련
+   */
+  public List<Animon> getAnimonList(Long childId, Long userId) {
+    Child child = getChildWithUser(childId, userId);
+    // ChildAnimon Table에서 Child가 가진 Animon 가져오기
     List<ChildAnimonEntity> childAnimonEntities =
         childAnimonRepository
-            .findByChildId(childId)
+            .findByChildId(child.getId())
             .orElseThrow(
                 () ->
                     new EoullimApplicationException(
                         ErrorCode.CHILD_ANIMON_NOT_FOUND, "사용자가 소유한 애니몬이 없습니다."));
+    // ChildAnimon Entity -> Child Animon DTO
     List<ChildAnimon> childAnimons =
         childAnimonEntities.stream().map(ChildAnimon::fromEntity).collect(Collectors.toList());
-
+    // Child Animon DTO -> Animon DTO
     return childAnimons.stream().map(ChildAnimon::getAnimon).collect(Collectors.toList());
   }
 
@@ -148,9 +152,12 @@ public class ChildService {
     return Animon.fromEntity(animonEntity);
   }
 
-  // Following하는 친구들 불러오기
+  /**
+   * Child - Follow 관련
+   * Following하는 친구들 불러오기
+    */
   public List<Child> getFriends(Long childId, User user) {
-    Child child = getChild(childId, user.getId());
+    Child child = getChildWithUser(childId, user.getId());
 
     // Follow DB에서 childId가 following 하는 child list 조회
     List<FollowEntity> followEntities = followRepository.findByChild(ChildEntity.of(child));
