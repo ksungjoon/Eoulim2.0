@@ -1,5 +1,8 @@
 package com.ssafy.eoullim.service;
 
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.ssafy.eoullim.model.RecordList;
 import com.ssafy.eoullim.model.Record;
 import com.ssafy.eoullim.model.Room;
@@ -39,8 +42,32 @@ public class RecordService {
 
     private final RecordQueryRepository recordQueryRepository;
 
+    private final AmazonS3 amazonS3Client;
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String S3BucketName;
+
     @Value("${OPENVIDU_URL}")
     private String OPENVIDU_URL;
+
+    public void uploadVideoToS3(String recordingId, Room room) {
+        String dir = "/var/lib/recorings/";
+        String recodrFolder = dir + recordingId + "/";
+
+        // 업로드 할 파일 경로
+        String filePath = recodrFolder + "VideoInfo.json";
+
+        // S3 객체 키 (파일 경로와 파일 이름)
+        String s3ObjectKey = "recordings/" + recordingId + "/VideoInfo.json";
+
+        try {
+            // Amazon S3로 파일 업로드
+            PutObjectRequest putRequest = new PutObjectRequest(S3BucketName, s3ObjectKey, new File(filePath));
+            amazonS3Client.putObject(putRequest);
+        } catch (AmazonServiceException e) {
+            e.printStackTrace();
+        }
+    }
 
     public void writeVideoToDB(String recordingId, Room room) throws IOException, ParseException {
 
