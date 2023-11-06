@@ -150,8 +150,6 @@ public class MatchService {
         mapRooms.get(sessionId).setTimeline(timeline);
 
         recordService.writeVideoToDB(recordId, mapRooms.get(sessionId));
-        // S3
-        recordService.uploadVideoToS3(recordId, mapRooms.get(sessionId));
 
         mapRooms.remove(sessionId);
         session.close();
@@ -263,8 +261,6 @@ public class MatchService {
         mapSessions.remove(sessionId);
 
         recordService.writeVideoToDB(recordId, mapRooms.get(sessionId));
-        // S3
-        recordService.uploadVideoToS3(recordId, mapRooms.get(sessionId));
 
         mapRooms.remove(sessionId);
         session.close();
