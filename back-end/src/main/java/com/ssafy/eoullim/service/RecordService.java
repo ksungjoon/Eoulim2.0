@@ -52,10 +52,10 @@ public class RecordService {
 
     public void uploadVideoToS3(String recordingId, Room room) {
         String dir = "/var/lib/recorings/";
-        String recodrFolder = dir + recordingId + "/";
+        String recordFolder = dir + recordingId + "/";
 
         // 업로드 할 파일 경로
-        String filePath = recodrFolder + "VideoInfo.json";
+        String filePath = recordFolder + "VideoInfo.json";
 
         // S3 객체 키 (파일 경로와 파일 이름)
         String s3ObjectKey = "recordings/" + recordingId + "/VideoInfo.json";
