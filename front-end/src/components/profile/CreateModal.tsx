@@ -12,8 +12,8 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import CloseIcon from '@mui/icons-material/Close';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import Swal from 'sweetalert2';
-import instance from 'apis/instance';
+import inputAlert from 'utils/inputAlert';
+import { postCheckSchool, postCreateProfile } from 'apis/profileApis';
 import { FormContainer } from './ModifyModalStyles';
 import { ModalOverlay, ModalContent, FlexContainer, HeaderContainer } from './CreateModalStyles';
 
@@ -25,27 +25,25 @@ const theme = createTheme({
   },
 });
 
-interface CreateModalProps {
+interface Props {
   onClose: () => void;
   getProfiles: () => void;
 }
 
-const CreateModal = ({ onClose, getProfiles }: CreateModalProps) => {
+const CreateModal = ({ onClose, getProfiles }: Props) => {
   const [name, setChildName] = useState('');
   const [birth, setChildBirth] = useState('');
   const [gender, setChildGender] = useState('');
   const [school, setChildSchool] = useState('');
   const [grade, setChildGrade] = useState('');
   const [isSchoolCorrect, setIsSchoolCorrect] = useState(false);
-  const namePattern = /^[가-힣]{2,4}$/;
 
-  const handleCreateProfile = async () => {
+  const namePattern = /^[가-힣]{2,4}$/;
+  const isValidName = namePattern.test(name);
+
+  const handleCreateProfile = () => {
     if (!name.trim() || !birth || !gender || !school || !grade) {
-      Swal.fire({
-        text: '모든 정보를 입력해주세요!',
-        icon: 'error',
-        confirmButtonText: '닫기',
-      });
+      inputAlert('모든 정보를 입력해주세요!');
       return;
     }
 
@@ -54,69 +52,45 @@ const CreateModal = ({ onClose, getProfiles }: CreateModalProps) => {
     // if (now > birthYear) {}
 
     if (!isSchoolCorrect) {
-      Swal.fire({
-        text: '학교 확인을 해주세요!',
-        icon: 'error',
-        confirmButtonText: '닫기',
-      });
+      inputAlert('학교 확인을 해주세요!');
       return;
     }
 
-    const isValidName = namePattern.test(name);
     if (!isValidName) {
-      Swal.fire({
-        text: '이름을 다시 입력해주세요!',
-        icon: 'error',
-        confirmButtonText: '닫기',
-      });
+      inputAlert('이름을 다시 입력해주세요!');
       return;
     }
 
-    try {
-      const profileData = { name, birth, gender, school, grade };
-      const response = await instance.post(`/children`, profileData);
-      console.log('프로필 생성 성공:', response);
-      console.log(profileData);
-      Swal.fire({
-        text: '프로필을 생성했습니다!',
-        icon: 'success',
-        confirmButtonText: '닫기',
-      }).then(() => {
-        getProfiles();
-        onClose();
-      });
-    } catch (error) {
-      console.log('프로필 생성실패:', error);
-    }
+    const profileData = { name, birth, gender, school: `${school}초등학교`, grade };
+    postCreateProfile({
+      profileData,
+      onSuccess: () => {
+        inputAlert('프로필을 생성했습니다!', false).then(() => {
+          getProfiles();
+          onClose();
+        });
+      },
+      onError: () => {
+        inputAlert('잠시 후 다시 시도해주세요!');
+      },
+    });
   };
 
-  const handleSchoolCheck = async () => {
-    try {
-      const response = await instance.post(`/open-api/schools`, {
-        keyword: school,
-      });
-      setIsSchoolCorrect(response.data.data);
-      if (response.data.data) {
-        Swal.fire({
-          text: '올바른 학교정보입니다!',
-          icon: 'success',
-          confirmButtonText: '닫기',
-        });
-      } else {
-        Swal.fire({
-          text: '다시 입력해주세요!',
-          icon: 'error',
-          confirmButtonText: '닫기',
-        });
-      }
-    } catch (error) {
-      console.error(error);
-      Swal.fire({
-        text: '잘못된 입력입니다!',
-        icon: 'error',
-        confirmButtonText: '닫기',
-      });
-    }
+  const handleSchoolCheck = () => {
+    postCheckSchool({
+      school,
+      onSuccess: isCorrect => {
+        setIsSchoolCorrect(isCorrect);
+        if (isCorrect) {
+          inputAlert('올바른 학교정보입니다!', false);
+        } else {
+          inputAlert('다시 입력해주세요!');
+        }
+      },
+      onError: () => {
+        inputAlert('잘못된 입력입니다!');
+      },
+    });
   };
 
   return (
