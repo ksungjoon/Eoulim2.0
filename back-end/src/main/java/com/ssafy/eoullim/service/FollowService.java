@@ -19,31 +19,19 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class FollowService {
-  //  private final ChildService childService;  // 순환 참조 때문에 인터페이스 만들어야 함
+  // Service
+  private final ChildService childService;
+  // Repo
   private final FollowRepository followRepository;
-  private final ChildRepository childRepository;
 
   @Transactional
   public void create(Long childId, Long friendId, User user) {
     // childId와 friendId가 같은 경우
     if (childId.equals(friendId)) throw new IllegalArgumentException("id가 같은 child끼리는 친구 할 수 없음.");
 
-    // 순환 참조 해결 해야 함
-    //    ChildEntity childEntity = ChildEntity.of(childService.getChild(childId, user.getId()));
-    //    ChildEntity followingChildEntity = childService.getChildEntity(friendId);
-
-    // 나
-    ChildEntity childEntity =
-        childRepository
-            .findById(childId)
-            .orElseThrow(() -> new EoullimApplicationException(ErrorCode.CHILD_NOT_FOUND));
-    if (!childEntity.getUser().getId().equals(user.getId()))
-      throw new EoullimApplicationException(ErrorCode.FORBIDDEN_NO_PERMISSION);
-    // 친구
-    ChildEntity followingChildEntity =
-        childRepository
-            .findById(friendId)
-            .orElseThrow(() -> new EoullimApplicationException(ErrorCode.CHILD_NOT_FOUND));
+    // 나와 상대방 Child Entity 조회
+    ChildEntity childEntity = ChildEntity.of(childService.getChild(childId, user.getId()));
+    ChildEntity followingChildEntity = childService.getChildEntity(friendId);
 
     // 이미 좋아요 누른 친구인 경우
     followRepository
@@ -54,10 +42,5 @@ public class FollowService {
             });
     // follow 등록
     followRepository.save(FollowEntity.of(childEntity, followingChildEntity));
-  }
-
-  public List<Follow> getFollowsByChild(Child child) {
-    List<FollowEntity> followEntities = followRepository.findByChild(ChildEntity.of(child));
-    return followEntities.stream().map(Follow::fromEntity).collect(Collectors.toList());
   }
 }

@@ -5,10 +5,7 @@ import com.ssafy.eoullim.exception.ErrorCode;
 import com.ssafy.eoullim.model.*;
 import com.ssafy.eoullim.model.entity.*;
 import com.ssafy.eoullim.repository.ChildCacheRepository;
-import com.ssafy.eoullim.repository.jpa.ChildAnimonRepository;
-import com.ssafy.eoullim.repository.jpa.FcmTokenRepository;
-import com.ssafy.eoullim.repository.jpa.AnimonRepository;
-import com.ssafy.eoullim.repository.jpa.ChildRepository;
+import com.ssafy.eoullim.repository.jpa.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,13 +20,13 @@ import java.util.stream.Collectors;
 public class ChildService {
   private final AnimonService animonService;
   private final ChildAnimonService childAnimonService;
-  private final FollowService followService;
 
   private final ChildRepository childRepository;
   private final ChildAnimonRepository childAnimonRepository;
   private final AnimonRepository animonRepository;
   private final ChildCacheRepository childCacheRepository;
   private final FcmTokenRepository fcmTokenRepository;
+  private final FollowRepository followRepository;
 
   @Transactional
   public Child login(Long childId, String token, Long userId) {
@@ -72,7 +69,7 @@ public class ChildService {
 
     // child 저장
     final var newChildEntity = childRepository.save(childEntity);
-    log.error(newChildEntity.getId().toString());
+    log.info(newChildEntity.getId().toString());
     // Child에게 애니몬 지급
     childAnimonService.saveChildAnimon(Child.fromEntity(newChildEntity), randomAnimons);
 
@@ -119,40 +116,46 @@ public class ChildService {
   }
 
   public List<Animon> getAnimonList(Long childId) {
-    final var childAnimons = childAnimonService.getChildAnimonsByChildId(childId);
+    List<ChildAnimonEntity> childAnimonEntities =
+        childAnimonRepository
+            .findByChildId(childId)
+            .orElseThrow(
+                () ->
+                    new EoullimApplicationException(
+                        ErrorCode.CHILD_ANIMON_NOT_FOUND, "사용자가 소유한 애니몬이 없습니다."));
+    List<ChildAnimon> childAnimons =
+        childAnimonEntities.stream().map(ChildAnimon::fromEntity).collect(Collectors.toList());
 
     return childAnimons.stream().map(ChildAnimon::getAnimon).collect(Collectors.toList());
   }
 
   @Transactional
   public Animon setProfileAnimon(Long childId, Long animonId) {
+    //    !! Service가 아닌 Repository를 의존한 경우 !!
+    //    장점: jpaEntity <-> model 변환을 하지 않아도 된다.
     // Child가 소유한 Animon임을 확인 한 후 해당 관계 DTO 가져오기
-    ChildAnimon childAnimon = childAnimonService.getChildAnimonByChildIdAndAnimonId(childId, animonId);
+    ChildAnimonEntity childAnimonEntity =
+        childAnimonRepository
+            .findByChildIdAndAnimonId(childId, animonId)
+            .orElseThrow(
+                () ->
+                    new EoullimApplicationException(
+                        ErrorCode.CHILD_ANIMON_NOT_FOUND, "사용자가 소유한 애니몬이 아닙니다."));
+    ChildEntity childEntity = childAnimonEntity.getChild();
+    AnimonEntity animonEntity = childAnimonEntity.getAnimon();
     // 변경하려는 Animon을 Child의 프로필 Animon으로 지정.
-    AnimonEntity animonEntity = AnimonEntity.of(childAnimon.getAnimon());
-    ChildEntity childEntity = ChildEntity.of(childAnimon.getChild());
     childEntity.setProfileAnimon(animonEntity);
-    // 왜 나는 이거 안하면 저장 안되지?
-    childRepository.save(childEntity);
     return Animon.fromEntity(animonEntity);
-
-//    !! childAnimonRepository에 의존했을 경우 !!
-//    장점: jpaEntity <-> model 변환을 하지 않아도 된다.
-//          service간 순환참조 문제가 발생하지 않는다.
-//          단일 책임 원칙을 지킬 수 있다.
-//    ChildAnimonEntity childAnimonEntity = childAnimonRepository.findByChildIdAndAnimonId(childId, animonId)
-//            .orElseThrow(() -> new EoullimApplicationException(ErrorCode.CHILD_ANIMON_NOT_FOUND, "사용자가 소유한 애니몬이 아닙니다."));
-//    ChildEntity childEntity = childAnimonEntity.getChild();
-//    AnimonEntity animonEntity = childAnimonEntity.getAnimon();
-//    childEntity.setProfileAnimon(animonEntity);
-//    return Animon.fromEntity(animonEntity);
-
   }
 
   // Following하는 친구들 불러오기
   public List<Child> getFriends(Long childId, User user) {
     Child child = getChild(childId, user.getId());
-    List<Follow> follows = followService.getFollowsByChild(child);
+
+    // Follow DB에서 childId가 following 하는 child list 조회
+    List<FollowEntity> followEntities = followRepository.findByChild(ChildEntity.of(child));
+    List<Follow> follows =
+        followEntities.stream().map(Follow::fromEntity).collect(Collectors.toList());
     return follows.stream().map(Follow::getFollowingChild).collect(Collectors.toList());
   }
 
