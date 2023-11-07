@@ -88,7 +88,7 @@ const MainPage: React.FC = () => {
   });
 
   const getNewFriend = () => {
-    navigate('/session');
+    navigate('/session', { state: { invitation: false } });
     logout();
   };
 
