@@ -13,9 +13,18 @@ interface ChildData {
   grade: string;
 }
 
-interface GetChildData extends ChildData {
+interface ChildLoginoutData {
+  childId: number;
+  fcmToken: string;
+}
+
+interface ModifyChildData extends ChildData {
   childId: number;
   status: string;
+}
+
+interface GetChildInfo extends ModifyChildData {
+  profileAnimon: { id: number; bodyImagePath: string; maskImagePath: string; name: string };
 }
 
 interface CreateChildParams extends ApiResponse {
@@ -23,11 +32,19 @@ interface CreateChildParams extends ApiResponse {
 }
 
 interface ModifyChildParams extends ApiResponse {
-  childData: GetChildData;
+  childData: ModifyChildData;
 }
 
 interface DeleteChildParams extends ApiResponse {
   childId: number;
+}
+
+interface ChildLoginParams extends ApiResponse {
+  childLoginData: ChildLoginoutData;
+}
+
+interface ChildLogoutParams extends ApiResponse {
+  childLogoutData: ChildLoginoutData;
 }
 
 interface CheckSchoolParams {
@@ -36,9 +53,9 @@ interface CheckSchoolParams {
   onError: () => void;
 }
 
-interface GetChildParams {
+interface GetChildInfoParams {
   childId: number;
-  onSuccess: (data: GetChildData) => void;
+  onSuccess: (data: GetChildInfo) => void;
   onError: () => void;
 }
 
@@ -62,15 +79,6 @@ export const postCheckSchool = async ({ school, onSuccess, onError }: CheckSchoo
   }
 };
 
-export const getChildData = async ({ childId, onSuccess, onError }: GetChildParams) => {
-  try {
-    const response = await instance.get(`/children/${childId}`);
-    onSuccess(response.data.data);
-  } catch (error) {
-    onError();
-  }
-};
-
 export const putModifyChild = async ({ childData, onSuccess, onError }: ModifyChildParams) => {
   try {
     await instance.put(`/children/${childData.childId}`, childData);
@@ -84,6 +92,39 @@ export const deleteChild = async ({ childId, onSuccess, onError }: DeleteChildPa
   try {
     await instance.delete(`/children/${childId}`);
     onSuccess();
+  } catch (error) {
+    onError();
+  }
+};
+
+export const childLogin = async ({ childLoginData, onSuccess, onError }: ChildLoginParams) => {
+  try {
+    await instance.post('/children/login', {
+      childId: childLoginData.childId,
+      fcmToken: childLoginData.fcmToken,
+    });
+    onSuccess();
+  } catch (error) {
+    onError();
+  }
+};
+
+export const childLogout = async ({ childLogoutData, onSuccess, onError }: ChildLogoutParams) => {
+  try {
+    await instance.post('/children/logout', {
+      childId: childLogoutData.childId,
+      fcmToken: childLogoutData.fcmToken,
+    });
+    onSuccess();
+  } catch (error) {
+    onError();
+  }
+};
+
+export const getChildInfo = async ({ childId, onSuccess, onError }: GetChildInfoParams) => {
+  try {
+    const response = await instance.get(`/children/${childId}`);
+    onSuccess(response.data.data);
   } catch (error) {
     onError();
   }
