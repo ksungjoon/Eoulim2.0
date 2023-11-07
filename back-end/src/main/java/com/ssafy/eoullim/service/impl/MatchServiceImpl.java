@@ -28,6 +28,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 @Service
 public class MatchServiceImpl implements MatchService {
+  private final RecordService recordService;
+  private final AlarmService alarmservice;
   private final ChildService childService;
 
   @Value("${OPENVIDU_URL}")
@@ -185,7 +187,6 @@ public class MatchServiceImpl implements MatchService {
       Long childId,
       String childName,
       Long friendId,
-      AlarmService alarmService,
       String existSessionId,
       Authentication authentication) {
     // Child ID가 현재 User의 Child가 맞는지 체크
@@ -198,7 +199,7 @@ public class MatchServiceImpl implements MatchService {
 
       // 알림 서비스
       Alarm alarm = new Alarm(result.getSessionId(), childName);
-      alarmService.send(friendId, alarm);
+      alarmservice.send(friendId, alarm);
 
       return result;
     }
@@ -223,7 +224,7 @@ public class MatchServiceImpl implements MatchService {
 
   @Override
   public Recording stopRandom(
-      String sessionId, List<Integer> guideSeq, List<String> timeline, RecordService recordService)
+      String sessionId, List<Integer> guideSeq, List<String> timeline)
       throws OpenViduJavaClientException, OpenViduHttpException, IOException, ParseException {
 
     if (mapSessions.get(sessionId) != null && mapRooms.get(sessionId) != null) {
@@ -260,7 +261,7 @@ public class MatchServiceImpl implements MatchService {
   }
 
   @Override
-  public Recording stopFriend(String sessionId, RecordService recordService)
+  public Recording stopFriend(String sessionId)
       throws OpenViduJavaClientException, OpenViduHttpException, IOException, ParseException {
     log.info("sessionId: " + sessionId);
     if (mapSessions.get(sessionId) != null && mapRooms.get(sessionId) != null) {
