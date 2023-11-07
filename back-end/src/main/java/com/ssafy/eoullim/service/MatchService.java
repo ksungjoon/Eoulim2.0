@@ -11,17 +11,19 @@ import java.io.IOException;
 import java.util.List;
 
 public interface MatchService {
-  Match startRandom(Long childId) throws OpenViduJavaClientException, OpenViduHttpException, InterruptedException;
-
-  Recording stopRandom(
-      String sessionId, List<Integer> guideSeq, List<String> timeline, RecordService recordService) throws OpenViduJavaClientException, OpenViduHttpException, IOException, ParseException ;
+  Match startRandom(Long childId, Long userId);
 
   Match startFriend(
       Long childId,
       String childName,
       Long friendId,
+      AlarmService alarmService,
       String existSessionId,
-      AlarmService alarmService)  throws OpenViduJavaClientException, OpenViduHttpException;
+      Long userId);
+
+  Recording stopRandom(
+      String sessionId, List<Integer> guideSeq, List<String> timeline, RecordService recordService)
+      throws OpenViduJavaClientException, OpenViduHttpException, IOException, ParseException;
 
   Recording stopFriend(String sessionId, RecordService recordService)
       throws OpenViduJavaClientException, OpenViduHttpException, IOException, ParseException;
