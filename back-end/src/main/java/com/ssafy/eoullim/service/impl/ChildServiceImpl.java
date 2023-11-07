@@ -6,6 +6,8 @@ import com.ssafy.eoullim.model.*;
 import com.ssafy.eoullim.model.entity.*;
 import com.ssafy.eoullim.repository.ChildCacheRepository;
 import com.ssafy.eoullim.repository.jpa.*;
+import com.ssafy.eoullim.service.AnimonService;
+import com.ssafy.eoullim.service.ChildAnimonService;
 import com.ssafy.eoullim.service.ChildService;
 import com.ssafy.eoullim.service.FcmTokenService;
 import com.ssafy.eoullim.utils.ClassUtils;
