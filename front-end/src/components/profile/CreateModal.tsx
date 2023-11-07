@@ -13,7 +13,7 @@ import dayjs from 'dayjs';
 import CloseIcon from '@mui/icons-material/Close';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import inputAlert from 'utils/inputAlert';
-import { postCheckSchool, postCreateProfile } from 'apis/profileApis';
+import { postCheckSchool, postCreateChild } from 'apis/profileApis';
 import { FormContainer } from './ModifyModalStyles';
 import { ModalOverlay, ModalContent, FlexContainer, HeaderContainer } from './CreateModalStyles';
 
@@ -27,10 +27,10 @@ const theme = createTheme({
 
 interface Props {
   onClose: () => void;
-  getProfiles: () => void;
+  getChildren: () => void;
 }
 
-const CreateModal = ({ onClose, getProfiles }: Props) => {
+const CreateModal = ({ onClose, getChildren }: Props) => {
   const [name, setChildName] = useState('');
   const [birth, setChildBirth] = useState('');
   const [gender, setChildGender] = useState('');
@@ -61,12 +61,12 @@ const CreateModal = ({ onClose, getProfiles }: Props) => {
       return;
     }
 
-    const profileData = { name, birth, gender, school: `${school}초등학교`, grade };
-    postCreateProfile({
-      profileData,
+    const childData = { name, birth, gender, school: `${school}초등학교`, grade };
+    postCreateChild({
+      childData,
       onSuccess: () => {
         inputAlert('프로필을 생성했습니다!', false).then(() => {
-          getProfiles();
+          getChildren();
           onClose();
         });
       },
