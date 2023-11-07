@@ -5,7 +5,7 @@ import { ProfileCreateBox, ProfileListBox } from './ProfileListStyles';
 import CreateModal from './CreateModal';
 
 interface Profile {
-  childId: number;
+  id: number;
   birth: string;
   gender: string;
   grade: string;
@@ -35,8 +35,8 @@ const ProfileList = () => {
     <ProfileListBox>
       {profiles.map((profile: Profile) => (
         <ProfileListItem
-          key={profile.childId}
-          childId={profile.childId}
+          key={profile.id}
+          childId={profile.id}
           name={profile.name}
           imgUrl={profile.profileAnimon.bodyImagePath}
           getChildren={handleGetChildren}

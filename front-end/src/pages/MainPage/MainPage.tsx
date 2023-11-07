@@ -28,8 +28,8 @@ const MainPage: React.FC = () => {
   const profileId = useRecoilValue(Profilekey);
   const token = useRecoilValue(tokenState);
   const fcmToken = useRecoilValue(fcmTokenState);
-  // const [profile, setProfile] = useRecoilState(Profile);
-  const [_, setProfile] = useRecoilState(Profile);
+  const [profile, setProfile] = useRecoilState(Profile);
+  // const [_, setProfile] = useRecoilState(Profile);
   const [eventSource, setEventSource] = useState<EventSource | null>(null);
   const [sessionId, setSessionId] = useState<string>('');
   const [userName, setUserName] = useState<string>('');
@@ -89,12 +89,10 @@ const MainPage: React.FC = () => {
 
   const getNewFriend = () => {
     navigate('/session', { state: { invitation: false } });
-    logout();
   };
 
   const handleFriendsClick = () => {
     navigate('/friends');
-    logout();
   };
   const getBack = () => {
     logout();
@@ -103,7 +101,7 @@ const MainPage: React.FC = () => {
 
   const getChild = () => {
     getChildInfo({
-      childId: profileId,
+      id: profileId,
       onSuccess: data => {
         setProfile(data);
         console.log('프로필 가져오기에 성공하였습니다.');
@@ -140,8 +138,8 @@ const MainPage: React.FC = () => {
 
   const [isModalOpen, setModalOpen] = useState(false);
   const [isAlarmOpen, setAlarmOpen] = useState(false);
-  // const IMGURL = `/${profile.profileAnimon.name}.png`;
-  const IMGURL = `/dog.png`;
+  const IMGURL = `/${profile.profileAnimon.name}.png`;
+  // const IMGURL = `/dog.png`;
 
   const audioObjRef = useRef(new Audio('/mainguide.mp3'));
 

@@ -51,8 +51,8 @@ const SessionPage = () => {
   const [isFriend, setFriend] = useState(false);
   const [, setUserToken] = useRecoilState(tokenState);
 
-  const [publisherId, setPublisherId] = useState(0);
-  const [subscriberId, setSubscriberId] = useState(-1);
+  const publisherId = useRecoilValue(Profilekey);
+  const [subscriberId, setSubscriberId] = useState(0);
   const [publisherVideoStatus, setPublisherVideoStatus] = useState(false);
   const [subscriberVideoStatus, setSubscriberVideoStatus] = useState(false);
   const [publisherAnimonURL, setPublisherAnimonURL] = useState('');
@@ -108,7 +108,6 @@ const SessionPage = () => {
   const [client, setClient] = useState<Client | null>(null);
 
   useEffect(() => {
-    setPublisherId(profileId);
     setPublisherAnimonURL(`${profile.profileAnimon.name}mask.png`);
     getFriends({
       profileId,
@@ -125,11 +124,9 @@ const SessionPage = () => {
   useEffect(() => {
     for (const user of streamList) {
       console.log('before', Number(user.userId), Number(publisherId));
-      if (Number(user.userId) !== profileId) {
-        console.log(user);
+      if (Number(user.userId) !== Number(profileId)) {
         console.log(user.userId, publisherId);
-        setSubscriberId(user.userId);
-        console.log(subscriberId);
+        setSubscriberId(Number(user.userId));
       }
     }
     console.log(publisherId, subscriberId);
@@ -399,11 +396,13 @@ const SessionPage = () => {
             <Loading isAnimonLoaded={false} />
           )}
         </MyVideo>
-        <CharacterContainer>
-          <Character onClick={nextGuidance} isPlaying={isPlaying}>
-            {clickEnabled ? <Click /> : null}
-          </Character>
-        </CharacterContainer>
+        {!state.invitaion ? (
+          <CharacterContainer>
+            <Character onClick={nextGuidance} isPlaying={isPlaying}>
+              {clickEnabled ? <Click /> : null}
+            </Character>
+          </CharacterContainer>
+        ) : null}
         <MyVideo>
           {streamList.length > 1 && streamList[0].streamManager ? (
             <>
