@@ -1,6 +1,5 @@
 package com.ssafy.eoullim.model;
 
-import com.ssafy.eoullim.model.entity.ChildEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -9,12 +8,19 @@ import lombok.Getter;
 public class OtherChild {
     private Long id;
     private String name;
-    private Animon animon;
-    public static OtherChild fromEntity(ChildEntity entity) {
+    private String gender;
+    private String school;
+    private Short grade;
+    private Animon profileAnimon;
+
+    public static OtherChild fromChild(Child child) {
         return new OtherChild(
-                entity.getId(),
-                entity.getName(),
-                Animon.fromEntity(entity.getProfileAnimon())
+                child.getId(),
+                child.getName(),
+                child.getGender(),
+                child.getSchool(),
+                child.getGrade(),
+                child.getProfileAnimon()
         );
     }
 }
