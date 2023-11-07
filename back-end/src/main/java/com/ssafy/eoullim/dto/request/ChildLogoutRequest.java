@@ -13,4 +13,6 @@ import javax.validation.constraints.NotNull;
 public class ChildLogoutRequest {
     @NotNull
     private Long childId;
+    @NotBlank
+    private String fcmToken;
 }

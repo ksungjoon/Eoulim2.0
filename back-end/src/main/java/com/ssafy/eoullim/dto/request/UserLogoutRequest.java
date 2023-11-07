@@ -9,11 +9,7 @@ import javax.validation.constraints.NotBlank;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserLoginRequest {
-    @NotBlank
-    private String username;
-    @NotBlank
-    private String password;
+public class UserLogoutRequest {
     @NotBlank
     private String fcmToken;
 }
