@@ -1,7 +1,6 @@
 package com.ssafy.eoullim.service;
 
 import com.ssafy.eoullim.model.Match;
-import com.ssafy.eoullim.service.impl.AlarmService;
 import io.openvidu.java.client.OpenViduHttpException;
 import io.openvidu.java.client.OpenViduJavaClientException;
 import io.openvidu.java.client.Recording;
@@ -16,7 +15,6 @@ public interface MatchService {
 
   Match startFriend(
           Long childId,
-          String childName,
           Long friendId,
           String existSessionId,
           Authentication authentication);

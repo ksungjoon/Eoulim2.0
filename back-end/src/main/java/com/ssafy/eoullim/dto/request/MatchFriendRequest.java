@@ -14,7 +14,6 @@ import javax.validation.constraints.NotNull;
 public class MatchFriendRequest {
     @NotNull
     Long childId;
-    String name;  
     String sessionId;
     @NotNull
     Long friendId;

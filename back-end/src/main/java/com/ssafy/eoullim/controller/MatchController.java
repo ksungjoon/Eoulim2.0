@@ -48,14 +48,12 @@ public class MatchController {
     List<String> timeline = matchStopRequest.getTimeline();
     log.info("Random Stop Called " + sessionId);
 
-    Recording recording = null;
     try {
-      recording = matchService.stopRandom(sessionId, guideSeq, timeline);
+      Recording recording = matchService.stopRandom(sessionId, guideSeq, timeline);
+      return new SuccessResponse<>(recording);
     } catch (OpenViduJavaClientException | OpenViduHttpException | IOException | ParseException e) {
       throw new RuntimeException(e);
     }
-
-    return new SuccessResponse<>(recording);
   }
 
   /* 친구 만나기 */
@@ -65,11 +63,9 @@ public class MatchController {
       @Valid @RequestBody MatchFriendRequest matchFriendRequest, Authentication authentication) {
     String existSessionId = matchFriendRequest.getSessionId();
     Long childId = matchFriendRequest.getChildId();
-    String childName = matchFriendRequest.getName();
     Long friendId = matchFriendRequest.getFriendId();
 
-    Match result =
-        matchService.startFriend(childId, childName, friendId, existSessionId, authentication);
+    Match result = matchService.startFriend(childId, friendId, existSessionId, authentication);
 
     return new SuccessResponse<>(result);
   }
@@ -79,13 +75,12 @@ public class MatchController {
   public SuccessResponse<?> stopFriend(@RequestBody Map<String, Object> params) {
 
     String sessionId = (String) params.get("sessionId");
-    Recording recording = null;
     try {
-      recording = matchService.stopFriend(sessionId);
+      Recording recording = matchService.stopFriend(sessionId);
+      return new SuccessResponse<>(recording);
     } catch (OpenViduJavaClientException | OpenViduHttpException | IOException | ParseException e) {
       log.info(e.getMessage());
       throw new RuntimeException(e);
     }
-    return new SuccessResponse<>(recording);
   }
 }
