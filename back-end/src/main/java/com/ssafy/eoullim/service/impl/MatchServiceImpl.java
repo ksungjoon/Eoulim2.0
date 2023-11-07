@@ -5,6 +5,7 @@ import com.ssafy.eoullim.exception.ErrorCode;
 import com.ssafy.eoullim.model.Alarm;
 import com.ssafy.eoullim.model.Match;
 import com.ssafy.eoullim.model.Room;
+import com.ssafy.eoullim.service.ChildService;
 import com.ssafy.eoullim.service.MatchService;
 import com.ssafy.eoullim.service.RecordService;
 import com.ssafy.eoullim.utils.RandomGeneratorUtils;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -36,7 +38,7 @@ public class MatchServiceImpl implements MatchService {
 
   private OpenVidu openvidu;
 
-  private Queue<Room> matchingQueue = new LinkedList<Room>();
+  private Queue<Room> matchingQueue = new LinkedList<>();
 
   // Collection to pair session names and OpenVidu Session objects
   private Map<String, Session> mapSessions = new ConcurrentHashMap<>();
@@ -50,6 +52,23 @@ public class MatchServiceImpl implements MatchService {
     this.openvidu = new OpenVidu(OPENVIDU_URL, OPENVIDU_SECRET);
   }
 
+  private Match createNewMatch(Long childId, Boolean isRandom) {
+    // session ID 짓기
+    String sessionId = buildSessionId(childId);
+    // Session Id를 통해 Open Vidu Session 생성
+    Session session = createNewOpenViduSession(sessionId);
+    mapSessions.put(sessionId, session);
+    // Connection Token 생성
+    String token = creatConnectionToken(session);
+    // Room 생성
+    Room newRoom = makeNewRoom(sessionId, isRandom, childId);
+    mapRooms.put(sessionId, newRoom);
+    // 랜덤 미팅이면 가이드 순서 넣기
+    return isRandom
+        ? new Match(sessionId, token, newRoom.getRandom())
+        : new Match(sessionId, token, null);
+  }
+
   private String buildSessionId(Long childId) {
     String formatNow = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
     String sessionId = String.format("%d_%s", childId, formatNow);
@@ -60,40 +79,17 @@ public class MatchServiceImpl implements MatchService {
     return sessionId;
   }
 
-  private Match createNewMatch(Long childId, Boolean isRandom) {
-    // session ID 짓기
-    String sessionId = buildSessionId(childId);
-
-    // Session Id를 통해 Open Vidu Session 생성
-    Session session = createNewOpenViduSession(sessionId);
-    mapSessions.put(sessionId, session);
-
-    // Connection 생성
-    String token = creatConnectionToken(session);
-
-    // Room 생성
-    Room newRoom = makeNewRoom(sessionId, isRandom, childId);
-    mapRooms.put(sessionId, newRoom);
-
-    return isRandom
-        ? new Match(sessionId, token, newRoom.getRandom())
-        : new Match(sessionId, token, null);
-  }
-
   private Session createNewOpenViduSession(String sessionId) {
     SessionProperties sessionProperties =
         new SessionProperties.Builder()
             .customSessionId(sessionId)
             .recordingMode(RecordingMode.MANUAL)
             .build();
-
-    Session session = null;
     try {
-      session = openvidu.createSession(sessionProperties);
+        return openvidu.createSession(sessionProperties);
     } catch (OpenViduJavaClientException | OpenViduHttpException e) {
       throw new EoullimApplicationException(ErrorCode.OPENVIDU_SERVER_ERROR, "Session 생성 실패");
     }
-    return session;
   }
 
   private String creatConnectionToken(Session session) {
@@ -148,15 +144,17 @@ public class MatchServiceImpl implements MatchService {
   }
 
   @Override
-  public synchronized Match startRandom(Long childId, Long userId) {
+  public synchronized Match startRandom(Long childId, Authentication authentication) {
     // Child ID가 현재 User의 Child가 맞는지 체크
-    final var child = childService.getChildWithUser(childId, userId);
+    final var child = childService.getChild(childId, authentication);
 
-    // 현재 매칭 큐에 미팅이 없는 경우
+    // 매칭 큐 - Empty
     if (matchingQueue.isEmpty()) {
       Match result = createNewMatch(childId, true);
       return result;
-    } else { // 매칭 중인 미팅이 있는 경우.
+    }
+    // 매칭 큐 - Not Empty
+    else { 
       Room existingRoom = matchingQueue.poll();
       String sessionId = existingRoom.getSessionId();
 
@@ -189,24 +187,20 @@ public class MatchServiceImpl implements MatchService {
       Long friendId,
       AlarmService alarmService,
       String existSessionId,
-      Long userId) {
-
+      Authentication authentication) {
     // Child ID가 현재 User의 Child가 맞는지 체크
-    final var child = childService.getChildWithUser(childId, userId);
+    final var child = childService.getChild(childId, authentication);
 
-    // 존재하는 방이 없을 때
+    // 존재 하는 방이 없을 때
     if (existSessionId == null) {
       // 없는거 확인했으면 세로운 세션 Id 만들기
       Match result = createNewMatch(childId, false);
 
-      /*
-      알림 서비스 코드 작성
-       */
+      // 알림 서비스
       Alarm alarm = new Alarm(result.getSessionId(), childName);
       alarmService.send(friendId, alarm);
 
       return result;
-
     }
     // existSessionId is not null
     else {
