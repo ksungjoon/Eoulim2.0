@@ -89,7 +89,7 @@ const SessionPage = () => {
 
   useEffect(() => {
     setPublisherId(profileId);
-    setPublisherAnimonURL(`${profile.animon.name}mask.png`);
+    setPublisherAnimonURL(`${profile.profileAnimon.name}mask.png`);
     getFriends();
   }, []);
 
