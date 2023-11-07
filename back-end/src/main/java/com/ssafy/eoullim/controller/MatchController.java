@@ -41,8 +41,7 @@ public class MatchController {
   @Transactional
   public synchronized SuccessResponse<?> startRandom(
       @Valid @RequestBody MatchStartRequest request, Authentication authentication) {
-    User user = ClassUtils.getSafeCastInstance(authentication.getPrincipal(), User.class);
-    Match result = matchService.startRandom(request.getChildId(), user.getId());
+    Match result = matchService.startRandom(request.getChildId(), authentication);
     return new SuccessResponse<>(result);
   }
 
@@ -78,7 +77,7 @@ public class MatchController {
 
     Match result =
         matchService.startFriend(
-            childId, childName, friendId, alarmService, existSessionId, user.getId());
+            childId, childName, friendId, alarmService, existSessionId, authentication);
 
     return new SuccessResponse<>(result);
   }
