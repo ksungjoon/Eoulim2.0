@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import box from '../../assets/box/backgroundmusic.png';
 import { SoundOn, SoundOff } from './BackgroundMusicStyles';
+import { S3_SOUND_BASE_URL } from '../../apis/urls';
 
 const BackgroundMusic: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -70,12 +71,7 @@ const BackgroundMusic: React.FC = () => {
         onChange={handleVolumeChange}
       />
       <audio ref={audioRef} loop>
-        <source
-          src={
-            'https://ssafy-9th-c103-eoullim-sound.s3.ap-northeast-2.amazonaws.com/music/background.mp3'
-          }
-          type={'audio/mpeg'}
-        />
+        <source src={`${S3_SOUND_BASE_URL}/music/background.mp3`} type={'audio/mpeg'} />
       </audio>
     </div>
   );
