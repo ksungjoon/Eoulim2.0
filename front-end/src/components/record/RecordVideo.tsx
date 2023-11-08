@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import { IconButton, Button } from '@mui/material';
 import ReactPlayer from 'react-player';
+import { getRecordInfo } from 'apis/recordApis';
 import {
   ModalOverlay,
   ModalContent,
@@ -15,11 +16,25 @@ import {
 interface VideoModalProps {
   onClose: () => void;
   videoPath: string;
-  guideSeq: string;
-  timeStamp: string;
+  recordId: number;
 }
 
-const VideoModal: React.FC<VideoModalProps> = ({ onClose, videoPath, guideSeq, timeStamp }) => {
+interface Guide {
+  content: string;
+  timeline: string;
+}
+
+interface RecordInfo {
+  animonName: string;
+  createTime: string;
+  guideInfo: Guide[];
+  id: number;
+  name: string;
+  school: string;
+  videoPath: string;
+}
+
+const VideoModal: React.FC<VideoModalProps> = ({ onClose, videoPath, recordId }) => {
   const guideScript: { [key: string]: string } = {
     '1': '안녕~ 다들 만나서 반가워!! 나는 어울림학교에 다니는 곰탱이 라고 해. 너희는 어디 학교 다니는지 이름이 뭔지~ 소개 해줄 수 있어?',
     '2': '나는 만화를 아주 좋아하는데 엉덩이탐정을 가장 좋아해. 너희는 어떤 만화를 좋아해? 친구에게 너가 가장 좋아하는 만화를 소개해줘.',
@@ -35,6 +50,18 @@ const VideoModal: React.FC<VideoModalProps> = ({ onClose, videoPath, guideSeq, t
     '12': '나는 엄마 아빠가 나한테 사랑해 라고 할 때 가장 좋아! 너희는 엄마 아빠가 뭐라고 말해줄 때 가장 좋아?',
     '13': '오늘 너희를 만나서 정말 즐거웠어. 너희는 새로운 친구를 만나보니 어때? 재밌었어?   우리 다음에 또 만나자~~ 안녕~~!',
   };
+
+  let recordInfo: RecordInfo;
+
+  getRecordInfo({
+    recordId,
+    onSuccess: data => {
+      recordInfo = data;
+    },
+    onError: () => {
+      console.log('녹화 정보를 불러오는데 실패하였습니다.');
+    },
+  });
 
   const videoRef = useRef<any>(null);
   const controlsRef = useRef<any>(null);
@@ -72,8 +99,12 @@ const VideoModal: React.FC<VideoModalProps> = ({ onClose, videoPath, guideSeq, t
     return `0${String(string)}`.slice(-2);
   }
 
-  const guideIndex = guideSeq?.split(' ');
-  const highlight = timeStamp?.split(' ');
+  // const guideIndex = guideSeq?.split(' ');
+  // const highlight = timeStamp?.split(' ');
+
+  const guideIndex = ['0', '0', '0', '0'];
+  const highlight = ['0', '0', '0', '0'];
+
   const info = [];
 
   for (let i = 0; i < 4; i += 1) {
