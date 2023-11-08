@@ -33,7 +33,6 @@ const MainPage: React.FC = () => {
   const [eventSource, setEventSource] = useState<EventSource | null>(null);
   const [sessionId, setSessionId] = useState<string>('');
   const [userName, setUserName] = useState<string>('');
-  const childLoginoutData = { childId: profileId, fcmToken };
 
   useEffect(() => {
     const source = new EventSource(`${API_BASE_URL}/alarms/subscribe/${profileId}`);
@@ -49,6 +48,14 @@ const MainPage: React.FC = () => {
   }, [navigate]);
 
   useEffect(() => {
+    let childLoginoutData;
+
+    if (fcmToken) {
+      childLoginoutData = { childId: profileId, fcmToken };
+    } else {
+      childLoginoutData = { childId: profileId, fcmToken: 'null' };
+    }
+
     getChild();
     childLogin({
       childLoginData: childLoginoutData,
@@ -109,6 +116,14 @@ const MainPage: React.FC = () => {
   };
 
   const logout = () => {
+    let childLoginoutData;
+
+    if (fcmToken) {
+      childLoginoutData = { childId: profileId, fcmToken };
+    } else {
+      childLoginoutData = { childId: profileId, fcmToken: 'null' };
+    }
+
     childLogout({
       childLogoutData: childLoginoutData,
       onSuccess: () => {
