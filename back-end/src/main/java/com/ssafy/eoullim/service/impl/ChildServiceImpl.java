@@ -157,7 +157,8 @@ public class ChildServiceImpl implements ChildService {
     Child child = getChildWithPermission(childId, authentication);
     ChildEntity childEntity = ChildEntity.of(child);
     childEntity.updateInfo(changedChild);
-    return Child.fromEntity(childEntity);
+    final var result = childRepository.save(childEntity);
+    return Child.fromEntity(result);
   }
 
   @Override
@@ -185,7 +186,8 @@ public class ChildServiceImpl implements ChildService {
     AnimonEntity animonEntity = childAnimonEntity.getAnimon();
     // 변경하려는 Animon을 Child의 프로필 Animon으로 지정.
     childEntity.setProfileAnimon(animonEntity);
-    return Animon.fromEntity(animonEntity);
+    final var result = childRepository.save(childEntity);
+    return Animon.fromEntity(result.getProfileAnimon());
   }
 
   /** Child - Follow 관련 Following하는 친구들 불러오기 */
