@@ -1,8 +1,10 @@
 package com.ssafy.eoullim.service;
 
-import com.ssafy.eoullim.model.User;
+import com.ssafy.eoullim.model.OtherChild;
 import org.springframework.security.core.Authentication;
 
 public interface FollowService {
-    void create(Long childId, Long friendId, Authentication authentication);
+    OtherChild create(Long childId, Long followingChildId, Authentication authentication);
+
+    void delete(Long childId, Long followingChildId, Authentication authentication);
 }
