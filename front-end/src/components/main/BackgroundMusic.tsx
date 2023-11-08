@@ -70,7 +70,12 @@ const BackgroundMusic: React.FC = () => {
         onChange={handleVolumeChange}
       />
       <audio ref={audioRef} loop>
-        <source src={'/background.mp3'} type={'audio/mpeg'} />
+        <source
+          src={
+            'https://ssafy-9th-c103-eoullim-sound.s3.ap-northeast-2.amazonaws.com/music/background.mp3'
+          }
+          type={'audio/mpeg'}
+        />
       </audio>
     </div>
   );

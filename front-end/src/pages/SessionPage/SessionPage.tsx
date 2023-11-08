@@ -183,7 +183,9 @@ const SessionPage = () => {
     if (!state.invitation && publisherGuideStatus && subscriberGuideStatus) {
       const nextIndex = index + 1;
       setIndex(nextIndex);
-      const guidance = new Audio(`/${guideSequence[nextIndex]}.mp3`);
+      const guidance = new Audio(
+        `https://ssafy-9th-c103-eoullim-sound.s3.ap-northeast-2.amazonaws.com/guide/${guideSequence[nextIndex]}.mp3`,
+      );
       if (nextIndex <= 4) {
         // const nextGuide = `${guideScript + guideSequence[nextIndex]} `;
         guideScript.push(guideSequence[nextIndex]);
