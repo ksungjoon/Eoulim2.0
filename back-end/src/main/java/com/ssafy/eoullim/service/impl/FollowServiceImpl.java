@@ -29,8 +29,8 @@ public class FollowServiceImpl implements FollowService {
     return childService.getChild(childId, authentication);
   }
 
-  private OtherChild getFollowingChild(Long followingId) {
-    return childService.getOtherChild(followingId);
+  private Child getFollowingChild(Long followingId) {
+    return childService.getChildWithNoPermission(followingId);
   }
 
   @Override
