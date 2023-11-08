@@ -9,7 +9,7 @@ import VideoModal from './RecordVideo';
 
 interface RecordListItemProps {
   animonName: string;
-  createTime: string;
+  createTime: number[];
   school: string;
   videoPath: string;
   name: string;
@@ -33,6 +33,7 @@ const RecordListItem: React.FC<RecordListItemProps> = ({
   const closeModal = () => {
     setModalOpen(false);
   };
+
   const formatTime = (timeString: string) => {
     const date = new Date(timeString);
     return date.toLocaleString(); // 원하는 형식으로 변환할 수 있습니다.
@@ -53,7 +54,7 @@ const RecordListItem: React.FC<RecordListItemProps> = ({
         </div>
         <div>
           {'녹화 날짜 : '}
-          {formatTime(createTime)}
+          {formatTime(String(createTime[5]))}
         </div>
       </OpponentImformation>
       {isModalOpen && <VideoModal onClose={closeModal} recordId={recordId} videoPath={videoPath} />}

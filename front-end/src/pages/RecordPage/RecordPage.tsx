@@ -4,12 +4,11 @@ import { useRecoilValue } from 'recoil';
 import { getRecords } from 'apis/recordApis';
 import RecordListItem from '../../components/record/RecordListItem';
 import { RecordPageContainer, EmptyRecord, Scroll, BackIcon } from './RecordPageStyles';
-import { tokenState } from '../../atoms/Auth';
 import { Profilekey } from '../../atoms/Profile';
 
 interface Record {
   animonName: string;
-  createTime: string;
+  createTime: number[];
   id: number;
   name: string;
   school: string;
@@ -17,7 +16,6 @@ interface Record {
 }
 
 const RecordPage = () => {
-  const token = useRecoilValue(tokenState);
   const childId = useRecoilValue(Profilekey);
   const [records, setRecords] = useState<Record[]>([]);
   const navigate = useNavigate();
@@ -26,13 +24,14 @@ const RecordPage = () => {
     getRecords({
       childId,
       onSuccess: data => {
+        console.log(data);
         setRecords(data);
       },
       onError: () => {
-        console.log('녹화 영상 불러오기 오류');
+        console.log('녹화 영상 리스트 불러오기 오류');
       },
     });
-  }, [childId, token]);
+  }, []);
 
   const getBack = () => {
     navigate('/profile');
