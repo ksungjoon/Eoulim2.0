@@ -69,7 +69,7 @@ export const useOpenVidu = (userId: any, sessionId: string, sessionToken: string
           ...prev.filter(sub => sub.userId !== data.childId),
           {
             streamManager: subscriber,
-            userId: data.childId,
+            userId: Number(data.childId),
           },
         ];
       });

@@ -24,6 +24,7 @@ const ProfileList = () => {
   }, []);
 
   const handleGetChildren = () => {
+    console.log('getchildren');
     getChildren({
       onSuccess: data => {
         setProfiles(data);

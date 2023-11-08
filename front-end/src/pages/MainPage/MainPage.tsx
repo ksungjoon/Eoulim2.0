@@ -49,20 +49,16 @@ const MainPage: React.FC = () => {
   }, [navigate]);
 
   useEffect(() => {
-    if (!token) {
-      navigate('/login');
-    } else {
-      getChild();
-      childLogin({
-        childLoginData: childLoginoutData,
-        onSuccess: () => {
-          console.log('프로필 로그인에 성공했습니다.');
-        },
-        onError: () => {
-          console.log('프로필 로그인에 실패하였습니다.');
-        },
-      });
-    }
+    getChild();
+    childLogin({
+      childLoginData: childLoginoutData,
+      onSuccess: () => {
+        console.log('프로필 로그인에 성공했습니다.');
+      },
+      onError: () => {
+        console.log('프로필 로그인에 실패하였습니다.');
+      },
+    });
   }, [profileId, token, navigate]);
 
   useEffect(() => {

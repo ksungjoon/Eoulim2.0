@@ -137,6 +137,7 @@ export const getChildInfo = async ({ id, onSuccess, onError }: GetChildInfoParam
 export const getChildren = async ({ onSuccess }: GetChildrenParams) => {
   try {
     const response = await instance.get('/children');
+    console.log(response);
     onSuccess(response.data.data);
   } catch (error) {
     console.error(error);

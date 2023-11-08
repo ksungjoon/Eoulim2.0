@@ -209,6 +209,7 @@ const SessionPage = () => {
 
   useWebSocket({
     onConnect(_, client) {
+      console.log('++++++++++++++++++++++++++++++++++++++', session.sessionId);
       setClient(client);
       client.subscribe(`/topic/${session.sessionId}/animon`, response => {
         console.log('메시지 수신:', response.body);
@@ -239,7 +240,7 @@ const SessionPage = () => {
       });
     },
     beforeDisconnected() {
-      setClient(null);
+      // setClient(null);
     },
   });
 
@@ -289,6 +290,7 @@ const SessionPage = () => {
     changeVideo({
       videoData,
       onSuccess: (isAnimonOn, message) => {
+        console.log(session.sessionId);
         setPublisherVideoStatus(isAnimonOn);
         client?.publish({
           destination: `/app/${session.sessionId}/animon`,
@@ -333,7 +335,7 @@ const SessionPage = () => {
     return false;
   };
 
-  const [checkVideo, setCheckVideo] = useState(false);
+  // const [checkVideo, setCheckVideo] = useState(false);
 
   if (open) {
     if (streamList.length !== 2) {
@@ -359,25 +361,25 @@ const SessionPage = () => {
       />
     );
   }
-  if (!checkVideo) {
-    return (
-      <SessionPageContainer>
-        <Container>
-          <MyVideo>
-            {streamList[1]?.streamManager && (
-              <StreamCanvas
-                streamManager={streamList[1]?.streamManager}
-                name={subscriberName}
-                avatarPath={subscriberAnimonURL}
-                videoState={subscriberVideoStatus}
-              />
-            )}
-          </MyVideo>
-          <button onClick={() => setCheckVideo(true)}>{'체크완료'}</button>
-        </Container>
-      </SessionPageContainer>
-    );
-  }
+  // if (!checkVideo) {
+  //   return (
+  //     <SessionPageContainer>
+  //       <Container>
+  //         <MyVideo>
+  //           {streamList[1]?.streamManager && (
+  //             <StreamCanvas
+  //               streamManager={streamList[1]?.streamManager}
+  //               name={subscriberName}
+  //               avatarPath={subscriberAnimonURL}
+  //               videoState={subscriberVideoStatus}
+  //             />
+  //           )}
+  //         </MyVideo>
+  //         <button onClick={() => setCheckVideo(true)}>{'체크완료'}</button>
+  //       </Container>
+  //     </SessionPageContainer>
+  //   );
+  // }
   return (
     <SessionPageContainer>
       <Container>
