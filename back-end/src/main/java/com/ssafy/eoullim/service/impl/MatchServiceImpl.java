@@ -68,53 +68,55 @@ public class MatchServiceImpl implements MatchService {
     // Child ID가 현재 User의 Child가 맞는지 체크
     matchList.add(MatchWait.builder().childId(matchStartRequest.getChildId()).grade(matchStartRequest.getGrade()).priority((short)0).build());
   }
-//
-
 
   @Scheduled(fixedDelay = 10000)
   public void makeMatch(){
-    int initLen = matchList.size(); // 이 때 큐에 있는 값만 빼기 위해서
-    List<MatchWait> curList = new ArrayList<>();
+    int initLen = matchList.size(); // 현재 큐에 있는 값만 빼기 위해서 - 함수 실행 중 큐에 들어오는 애들은 다음 스케쥴 때 진행할거여서 상관없음
+    List<MatchWait> curList = new ArrayList<>(); // 큐에서 뺀 애들 저장하기 위해
+    List<MatchWait> leftList = new ArrayList<>();
+
+    boolean [] visited = new boolean[initLen];
+    Arrays.fill(visited, false);
+    int []cntNum = new int[4];
+    int startIdx = 0;
+
     for(int i = 0; i < initLen; i++){
       curList.add(matchList.poll()); // 큐에서는 현재 개수만큼 빼고 새로 옮기기
     }
-    Collections.sort(curList);
-    int []cntNum = new int[4];
+    Collections.sort(curList); // 학년 -> 우선순위, 둘다 내림차순 정렬
     for (MatchWait match : curList){
       cntNum[(int)match.getGrade()]++; // 학년 개수 count
     }
-    int startIdx = 0;
-    boolean [] visited = new boolean[initLen];
-    Arrays.fill(visited, false);
+
     for(int i=1; i< 4; i++){
       if (cntNum[i] < 2){ // 학년 인원이 2인 아래면 넘기기
         startIdx += cntNum[i];
         continue;
       }
-      for(int j=0; j < cntNum[i] / 2; j++){ // 짝수 인원만큼 매칭
-        Long childOne = curList.get(startIdx+(2*j)).getChildId();
-        Long childTwo = curList.get(startIdx+(2*j)+1).getChildId();
-        visited[startIdx+(2*j)] = true;
-        visited[startIdx+(2*j)+1] = true;
-
+      for(int j=0; j < cntNum[i]; j++){ // 짝수 인원만큼 매칭
+        if(j == cntNum[j] - 1){
+          MatchWait left = curList.get(startIdx+j);
+          short newPriority = (short)(left.getGrade()+1);
+          left.setPriority(newPriority);
+          leftList.add(left);
+          continue;
+        }
+        Long childOne = curList.get(startIdx+j).getChildId();
+        Long childTwo = curList.get(startIdx+j+1).getChildId();
+        j += 1;
         sendMatchResult(childOne, childTwo);
       }
 
       startIdx += cntNum[i];
     }
-
-    List<MatchWait> leftList = new ArrayList<>();
-    boolean limpMode = false;
-    for(int i =0; i< visited.length ; i++){
-      if(visited[i])continue;
-      MatchWait left = curList.get(i);
-      if(left.getPriority()>5){
-        limpMode = true;
-      }
-      short newPriority = (short)(left.getGrade()+1);
-      left.setPriority(newPriority);
-      leftList.add(left);
-    }
+    //------------------------------------------------------------//
+//    for(int i =0; i< visited.length ; i++){
+//      if(visited[i])continue;
+//      MatchWait left = curList.get(i);
+//      short newPriority = (short)(left.getGrade()+1);
+//      left.setPriority(newPriority);
+//      leftList.add(left);
+//    }
     leftList.sort(new Comparator<MatchWait>() { // 우선순위로 정렬
       @Override
       public int compare(MatchWait o1, MatchWait o2) {
@@ -123,11 +125,14 @@ public class MatchServiceImpl implements MatchService {
     });
     
     for(int i = 0; i < leftList.size(); i++){
-      if(i== leftList.size()-1)continue;
+      if(i == leftList.size()-1){
+        matchList.add(leftList.get(i));
+        continue;
+      }
       MatchWait left = leftList.get(i);
       if(left.getPriority()>5){
         sendMatchResult(left.getChildId(), leftList.get(i+1).getChildId());
-        i+=1; // 두 개 읽었으므로 인덱스 하나 건너뜀
+        i += 1; // 두 개 읽었으므로 인덱스 하나 건너뜀
       }
       else{
         matchList.add(left);
