@@ -10,7 +10,7 @@ import {
 import { SessionId, guideSeq } from '../atoms/Session';
 import { InvitationSessionId, InvitationToken } from '../atoms/Ivitation';
 
-export const useOpenVidu = (userId: any, sessionId: string, sessionToken: string) => {
+export const useOpenVidu = (userId: number, sessionId: string, sessionToken: string) => {
   const [session, setSession] = useState<any>(null);
   const [publisher, setPublisher] = useState<any>(null);
   const [subscribers, setSubscribers] = useState<any[]>([]);
@@ -95,7 +95,7 @@ export const useOpenVidu = (userId: any, sessionId: string, sessionToken: string
         childId: userId,
         onSuccess: data => {
           const userData = {
-            childId: userId,
+            userId,
             ...data,
           };
           getToken({
