@@ -1,10 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { fcmTokenState } from 'atoms/Firebase';
 import { useRecoilState } from 'recoil';
 import AlarmModal from 'components/main/AlarmModal';
-import { useState } from 'react';
 
 export const FireBase = () => {
   const [fcmToken, setFcmToken] = useRecoilState(fcmTokenState);
@@ -54,9 +53,15 @@ export const FireBase = () => {
   // 포그라운드 메시지 수신
   onMessage(messaging, payload => {
     console.log('Message received. ', payload);
-    setAlarmOpen(true);
-    setSessionId('');
-    setUserName('');
+    if (payload.notification) {
+      if (payload.notification.title) {
+        setUserName(payload.notification.title.split(' ')[0]);
+      }
+      if (payload.notification.body) {
+        setSessionId(payload.notification.body.split(' ')[-1]);
+      }
+      setAlarmOpen(true);
+    }
     // ...
   });
 
