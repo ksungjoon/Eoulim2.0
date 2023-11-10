@@ -37,6 +37,8 @@ public class MatchServiceImpl implements MatchService {
   private final RecordService recordService;
   private final AlarmService alarmservice;
   private final ChildService childService;
+  private final SimpMessageSendingOperations simpMessageSendingOperations;
+  
   private final FirebaseMessagingService firebaseMessagingService;
   private final FcmTokenService fcmTokenService;
 
