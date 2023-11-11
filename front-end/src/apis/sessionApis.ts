@@ -32,7 +32,7 @@ interface FollowingParams extends ApiResponse {
 }
 
 interface FriendsParams {
-  profileId: number;
+  childId: number;
   onSuccess: (data: any) => void;
   onError: () => void;
 }
@@ -72,9 +72,9 @@ export const getAnimon = async ({ subscriberId, onSuccess, onError }: AnimonPara
   }
 };
 
-export const getFriends = async ({ profileId, onSuccess, onError }: FriendsParams) => {
+export const getFriends = async ({ childId, onSuccess, onError }: FriendsParams) => {
   try {
-    const response = await instance.get(`/children/${profileId}/follows`);
+    const response = await instance.get(`/children/${childId}/follows`);
     onSuccess(response.data.data);
   } catch (error) {
     onError();

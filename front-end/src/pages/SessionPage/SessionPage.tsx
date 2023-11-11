@@ -41,7 +41,7 @@ interface FriendsProfile {
 const SessionPage = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
-  const { invitation } = state;
+  const { childId, invitation } = state;
   const [open, setOpen] = useState(false);
   const [refuse, setRefuse] = useState(false);
   const [first, setFirst] = useState(true);
@@ -58,7 +58,6 @@ const SessionPage = () => {
   const [subscriberGuideStatus, setSubscriberGuideStatus] = useState(false);
 
   const [clickEnabled, setClickEnabled] = useState(false);
-  const [profileId] = useRecoilState(Profilekey);
   const profile = useRecoilValue(Profile);
   const [subscriberName, setSubscriberName] = useState('');
   const isAnimonLoaded = useRecoilValue(IsAnimonLoaded);
@@ -77,7 +76,7 @@ const SessionPage = () => {
   const sessionToken = useRecoilValue(InvitationToken);
 
   const { streamList, session, isOpen, onChangeMicStatus } = useOpenVidu(
-    profileId,
+    childId,
     invitationSessionId,
     sessionToken,
   );
@@ -99,7 +98,7 @@ const SessionPage = () => {
     setTimeline([]);
     setPublisherAnimonURL(`${profile.profileAnimon.maskImagePath}`);
     getFriends({
-      profileId,
+      childId,
       onSuccess: data => {
         setFriends(data);
         console.log('친구 불러오기 성공');
@@ -113,7 +112,7 @@ const SessionPage = () => {
   useEffect(() => {
     for (const user of streamList) {
       console.log('before', Number(user.userId), Number(publisherId));
-      if (Number(user.userId) !== Number(profileId)) {
+      if (Number(user.userId) !== childId) {
         console.log(user.userId, publisherId);
         setSubscriberId(Number(user.userId));
       }
