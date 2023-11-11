@@ -21,7 +21,7 @@ import {
   Click,
   CharacterContainer,
 } from './SessionPageStyles';
-import { Profile, Profilekey } from '../../atoms/Profile';
+import { Profile } from '../../atoms/Profile';
 import { IsAnimonLoaded, guideSeq, GuideScript, Timeline, SessionId } from '../../atoms/Session';
 import EndModal from '../../components/stream/EndModal';
 import { destroySession } from '../../apis/openViduApis';
@@ -48,8 +48,7 @@ const SessionPage = () => {
   const [friends, setFriends] = useState<FriendsProfile[]>([]);
   const [isFriend, setFriend] = useState(false);
 
-  const publisherId = useRecoilValue(Profilekey);
-  const [subscriberId, setSubscriberId] = useState(0);
+  const [friendId, setFriendId] = useState(0);
   const [publisherVideoStatus, setPublisherVideoStatus] = useState(false);
   const [subscriberVideoStatus, setSubscriberVideoStatus] = useState(false);
   const [publisherAnimonURL, setPublisherAnimonURL] = useState('');
@@ -111,13 +110,13 @@ const SessionPage = () => {
 
   useEffect(() => {
     for (const user of streamList) {
-      console.log('before', Number(user.userId), Number(publisherId));
+      console.log('before', Number(user.userId), Number(childId));
       if (Number(user.userId) !== childId) {
-        console.log(user.userId, publisherId);
-        setSubscriberId(Number(user.userId));
+        console.log(user.userId, childId);
+        setFriendId(Number(user.userId));
       }
     }
-    console.log(publisherId, subscriberId);
+    console.log(childId, friendId);
 
     if (!state.invitation && !open && streamList[0]?.userId && streamList[1]?.userId && first) {
       setFirst(isFalse);
@@ -138,25 +137,25 @@ const SessionPage = () => {
 
   useEffect(() => {
     for (const user of streamList) {
-      if (Number(user.userId) !== Number(publisherId)) {
-        setSubscriberId(Number(user.userId));
+      if (Number(user.userId) !== Number(childId)) {
+        setFriendId(Number(user.userId));
         friends.forEach(user => {
-          console.log(user.id, subscriberId);
-          console.log(Number(user.id) === Number(subscriberId));
-          if (String(user.id) === String(subscriberId)) {
+          console.log(user.id, friendId);
+          console.log(Number(user.id) === Number(friendId));
+          if (String(user.id) === String(friendId)) {
             console.log('친구입니다.');
             setFriend(isTrue);
           }
         });
       }
     }
-    console.log(publisherId, subscriberId);
-  }, [subscriberId]);
+    console.log(childId, friendId);
+  }, [friendId]);
 
   useEffect(() => {
-    if (subscriberId) {
+    if (friendId) {
       getAnimon({
-        subscriberId,
+        friendId,
         onSuccess: data => {
           setSubscriberAnimonURL(`${data.profileAnimon.maskImagePath}`);
           setSubscriberName(data.name);
@@ -166,7 +165,7 @@ const SessionPage = () => {
         },
       });
     }
-  }, [subscriberId]);
+  }, [friendId]);
 
   useEffect(() => {
     if (!state.invitation && publisherGuideStatus && subscriberGuideStatus) {
@@ -202,10 +201,10 @@ const SessionPage = () => {
       client.subscribe(`/topic/${sessionId}/animon`, response => {
         console.log('메시지 수신:', response.body);
         const message = JSON.parse(response.body);
-        if (message.childId !== String(publisherId)) {
+        if (message.childId !== String(childId)) {
           console.log(message.childId, message.isAnimonOn);
           console.log('상대방이 화면을 껐습니다.');
-          // setSubscriberId(message.childId);
+          // setFriendId(message.childId);
           setSubscriberVideoStatus(message.isAnimonOn);
         }
       });
@@ -213,8 +212,8 @@ const SessionPage = () => {
         client.subscribe(`/topic/${sessionId}/guide`, response => {
           const message = JSON.parse(response.body);
           console.log(message);
-          if (message.childId !== String(publisherId)) {
-            // setSubscriberId(message.childId);
+          if (message.childId !== String(childId)) {
+            // setFriendId(message.childId);
             setSubscriberGuideStatus(message.isNextGuideOn);
           }
         });
@@ -222,7 +221,7 @@ const SessionPage = () => {
       client.subscribe(`/topic/${sessionId}/leave-session`, response => {
         const message = JSON.parse(response.body);
         console.log(message);
-        if (message.childId !== String(publisherId)) {
+        if (message.childId !== String(childId)) {
           setOpen(isTrue);
         }
       });
@@ -246,7 +245,7 @@ const SessionPage = () => {
     if (invitation) {
       if (client) {
         const jsonMessage = {
-          childId: String(publisherId),
+          childId: String(childId),
           isLeft: true,
         };
         const message = JSON.stringify(jsonMessage);
@@ -275,8 +274,8 @@ const SessionPage = () => {
   };
 
   const addFriend = () => {
-    console.log(publisherId, subscriberId);
-    const followingData = { childId: publisherId, followingChildId: subscriberId };
+    console.log(childId, friendId);
+    const followingData = { childId, followingChildId: friendId };
     follow({
       followingData,
       onSuccess: () => {
@@ -289,7 +288,7 @@ const SessionPage = () => {
   };
 
   const changeVideoStatus = () => {
-    const videoData = { id: publisherId, status: publisherVideoStatus };
+    const videoData = { id: childId, status: publisherVideoStatus };
     changeVideo({
       videoData,
       onSuccess: (isAnimonOn, message) => {
@@ -317,7 +316,7 @@ const SessionPage = () => {
         const isNextGuideOn = !publisherGuideStatus;
         setPublisherGuideStatus(isNextGuideOn);
         const jsonMessage = {
-          childId: String(publisherId),
+          childId: String(childId),
           isNextGuideOn,
         };
         const message = JSON.stringify(jsonMessage);

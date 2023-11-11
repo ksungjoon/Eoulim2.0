@@ -16,7 +16,7 @@ interface VideoData {
 }
 
 interface AnimonParams {
-  subscriberId: number;
+  friendId: number;
   onSuccess: (data: any) => void;
   onError: () => void;
 }
@@ -62,9 +62,9 @@ export const follow = async ({ followingData, onSuccess, onError }: FollowingPar
   }
 };
 
-export const getAnimon = async ({ subscriberId, onSuccess, onError }: AnimonParams) => {
+export const getAnimon = async ({ friendId, onSuccess, onError }: AnimonParams) => {
   try {
-    const response = await instance.get(`/children/participant/${subscriberId}`);
+    const response = await instance.get(`/children/participant/${friendId}`);
     console.log('Success Get Animon');
     onSuccess(response.data.data);
   } catch (error) {
