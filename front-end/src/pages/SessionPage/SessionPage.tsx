@@ -398,7 +398,7 @@ const SessionPage = () => {
   return (
     <SessionPageContainer>
       <Container>
-        <MyVideo>
+        <FriendVideo>
           {streamList.length > 1 && streamList[1].streamManager ? (
             <>
               <StreamCanvas
@@ -412,7 +412,7 @@ const SessionPage = () => {
           ) : (
             <Loading isAnimonLoaded={false} />
           )}
-        </MyVideo>
+        </FriendVideo>
 
         {!invitation ? (
           <CharacterContainer>
@@ -421,7 +421,7 @@ const SessionPage = () => {
             </Character>
           </CharacterContainer>
         ) : null}
-        <FriendVideo>
+        <MyVideo>
           {streamList.length > 1 && streamList[0].streamManager ? (
             <>
               <StreamCanvas
@@ -435,7 +435,7 @@ const SessionPage = () => {
           ) : (
             <Loading isAnimonLoaded={false} />
           )}
-        </FriendVideo>
+        </MyVideo>
       </Container>
       <NavContainer>
         <Buttons>
