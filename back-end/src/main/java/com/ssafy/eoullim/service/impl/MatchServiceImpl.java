@@ -471,10 +471,10 @@ public class MatchServiceImpl implements MatchService {
       throws OpenViduJavaClientException, OpenViduHttpException, IOException, ParseException {
 
     if (mapSessions.get(sessionId) != null && mapRooms.get(sessionId) != null) {
-
+      log.info("Session Found");
       Session session = mapSessions.get(sessionId);
       if (matchingQueue.contains(mapRooms.get(sessionId))) { // 매치가 안되었는데 나갔을 경우
-
+        log.info("[ERROR] 매치가 안되었는데 나갔을 경우");
         matchingQueue.remove(mapRooms.get(sessionId));
         mapSessions.remove(sessionId);
         mapRooms.remove(sessionId);
@@ -482,6 +482,7 @@ public class MatchServiceImpl implements MatchService {
         throw new EoullimApplicationException(ErrorCode.MATCH_NOT_FOUND);
 
       } else { // 매치가 된 후 나갔을 경우
+        log.info("매치가 된 후 나갔을 경우");
         String recordId = sessionRecordings.get(sessionId);
         Recording recording = openvidu.stopRecording(recordId);
 
