@@ -285,8 +285,8 @@ const SessionPage = () => {
       });
     }
     session.disconnect();
-    sendToMobile();
     navigate('/');
+    sendToMobile();
   };
 
   const sendToMobile = () => {
