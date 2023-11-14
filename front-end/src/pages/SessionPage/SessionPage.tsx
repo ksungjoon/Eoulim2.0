@@ -286,6 +286,13 @@ const SessionPage = () => {
     }
     session.disconnect();
     navigate('/');
+    sendToMobile();
+  };
+
+  const sendToMobile = () => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    Toaster.postMessage('leave');
   };
 
   const addFriend = () => {
@@ -402,9 +409,9 @@ const SessionPage = () => {
             {streamList[0]?.streamManager && (
               <StreamCanvas
                 streamManager={streamList[0]?.streamManager}
-                name={subscriberName}
-                avatarPath={subscriberAnimonURL}
-                videoState={subscriberVideoStatus}
+                name={profile.name}
+                avatarPath={`${publisherAnimonURL}`}
+                videoState={publisherVideoStatus}
               />
             )}
           </CheckVideo>
