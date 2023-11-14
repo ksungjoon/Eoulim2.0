@@ -164,7 +164,7 @@ class FaceCanvas {
   }
 
   addMaterial() {
-    this.textureLoader = new THREE.TextureLoader().crossOrigin('anonymous');
+    this.textureLoader = new THREE.TextureLoader().setCrossOrigin('anonymous');
     // this.textureLoader.setRequestHeader({
     //   'Access-Control-Allow-Origin': '*',
     // });
