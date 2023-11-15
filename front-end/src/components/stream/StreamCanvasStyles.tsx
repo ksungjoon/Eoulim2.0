@@ -4,9 +4,7 @@ export const Canvas = styled.canvas<{ videoState: boolean }>`
   position: absolute;
   top: 0;
   left: 0;
-  object-fit: cover;
-  height: 100%;
-  width: 100%;
+  object-fit: fill;
   visibility: ${(props) => (props.videoState ? "hidden" : "visible")};
   z-index: 2001;
 `;
