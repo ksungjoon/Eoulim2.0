@@ -14,7 +14,7 @@
 
 <div align=center>
 
-![웹 화면](exec/assets/main.png){: width="800" height=""}
+![웹 화면](exec/assets/main.png)
 
 📅 프로젝트 기간 : 2023.10.10 ~ 2023.11.17 (7주)
 
@@ -41,6 +41,7 @@
 
 ## UCC 및 기능 소개 영상 🎞
 
+-   [서비스 소개 영상 🤓](https://drive.google.com/file/d/10tspRfPEKhmzy1KJgQCRTEFDJT69SvtZ/view?usp=sharing)
 -   [웹 버전 소개 영상 💻](https://drive.google.com/file/d/1IIx0d_rorvFW5X0CqHQwpK-YbDkQQlmi/view?usp=sharing)
 -   [모바일 버전 소개 영상 📱](https://drive.google.com/file/d/1sek_JLcS31JuHtbJJcuEgt2MBa28yvrc/view?usp=sharing)
 
